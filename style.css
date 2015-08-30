@@ -1,0 +1,44 @@
+﻿/*#canvas01{
+	position: absolute;
+	left: 50px;
+	top: 50px;
+	margin: 0;
+	padding: 0;
+	border: 1px solid black;
+}*/
+#cont{
+	/*border: 1px solid black;*/
+	background-color: #aaa;
+	position: absolute;
+	left: 222px;
+	top: 115px;
+	width: 500px;
+	height: 500px;
+}
+
+.bubbleContainer{
+	/*border: 1px dotted green;*/
+	position: absolute;
+
+	/*top: 10px;
+	left: 10px;
+	width: 350px;*/
+}
+
+.bubbleText{
+	background-color: #fff;
+	padding: 10px;
+	/*border: 1px solid black;*/
+	border-radius: 30px;
+	text-align: justify;
+	box-shadow: 0 0 3px 0px black;
+
+}
+
+
+canvas.bubbleTail{
+	/*background-color: #ddd;*/
+	position: relative;
+	top: -1px;
+	/*width: 100%;*/
+}
