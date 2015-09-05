@@ -4,21 +4,25 @@ function Bubble(containerId){
 	this.containerId     = containerId; // Контейнер. Это должен быть элемент с position != static, поскольку относительно него будут задаваться координаты
 
 	//Параметры пузыря
-	this.textMaxWidth    = 2000; // максимальная ширина текстового блока
-	this.textPadding     = 20;  // отступ от края текстового блока до текста внутри него
+	this.textMaxWidth    = 200; // максимальная ширина текстового блока
+	this.textPadding     = 15;  // отступ от края текстового блока до текста внутри него
+	this.fontSize        = 14;  // размер шрифта
 	this.borderRadius    = 50;  // радиус скругления углов у текстового блока
 	this.textAura        = 20;  // "аура" текстового блока, окончания хвоста не может быть ближе к тектовому блоку чем указанная величина
 	this.baseTailWidth   = 16;  // ширина основания хвоста
 	this.backGroundColor = '#FFF' // цвет заливки (по умолчанию белый)
 	this.borderColor     = '#000' // цвет границ (по умолчанию черный)
 
-	this.create = function(text, bubbleX, bubbleY, tailX, tailY){
+	this.create = function(text, bubbleX, bubbleY, tailX, tailY, curveXCust, curveYCust, directCust){
 		/*
 		text           - непосредственно текст (text)
-		bubbleX        - координата X для верхнего левого края текстового блока в пикселах, относительно containerId (int, float)
-		bubbleY        - координата Y для верхнего левого края текстового блока в пикселах, относительно containerId (int, float)
-		tailX          - координата X для окончания хвоста в пикселах, относительно containerId (int, float)
-		tailY          - координата X для окончания хвоста в пикселах, относительно containerId (int, float)
+		bubbleX        - 
+		bubbleY        - координаты для верхнего левого края текстового блока в пикселах, относительно containerId (int, float)
+		tailX          - 
+		tailY          - координаты для окончания хвоста в пикселах, относительно containerId (int, float)
+		curveXCust     - 
+		curveYCust     - кооэфициент для координат точки изгиба гривых хвоста (от 0 до 1; если не передан, то берется по умолчанию)
+		directCust     - сторона текстового блока из которой будет "расти" хвост (если не задан, то определяется по умолчанию)
 		*/
 
 		//контейнер
@@ -42,9 +46,10 @@ function Bubble(containerId){
 		bubbleText.classList.add("bubbleText");
 		bubbleText.style.borderRadius = _self.borderRadius + "px";
 		bubbleText.style.padding = _self.textPadding + "px";
+		bubbleText.style.fontSize = _self.fontSize + "px";
 
 		//вставляем текст в соответствующий блок
-		bubbleText.insertAdjacentHTML("beforeEnd", '<span>' + text+  '</span>');
+		bubbleText.insertAdjacentHTML("beforeEnd", "<span>" + text + "</span>");
 
 		// вставляем блок с текстом в общий контейнер
 		bubbleContainer.insertAdjacentElement("beforeEnd", bubbleText);
@@ -60,7 +65,6 @@ function Bubble(containerId){
 		//ширина текстового блока
 		var textWidth = parseFloat(bubbleText.clientWidth);
 
-		// debugger
 		bubbleContainer.style.width = textWidth + 1 + "px";
 
 
@@ -87,11 +91,11 @@ function Bubble(containerId){
 		var canvasStyleLeft;
 		var canvasStyleTop;
 
-		//Координаты конца хвоста в самом canvas-е
-		var canvasTailX = 0; // понадобится для direct in ('up', 'down')
-		var canvasTailY = 0; // понадобится для direct in ('left', 'right')
+		//Специальные координаты конца хвоста в самом canvas-е для direct in ('up', 'down', 'left', 'right')
+		var tailXSpec = 0; // понадобится для direct in ('up', 'down')
+		var tailYSpec = 0; // понадобится для direct in ('left', 'right')
 
-		if (tailY < bubbleY - textAura){
+		if (((tailY < bubbleY - textAura) && !directCust) || directCust == 'up'){
 			direct = 'up';
 
 			// Уменьшаем ширину основания хвоста, если текстовый блок слишком маленький
@@ -112,7 +116,7 @@ function Bubble(containerId){
 				canvasWidth     = realBaseTailWidth;
 				canvasHeight    = Math.abs(tailY - baseTailY);
 				canvasStyleLeft = baseTailX;
-				canvasTailX     = tailX - (bubbleX + baseTailX);
+				tailXSpec     = tailX - (bubbleX + baseTailX);
 
 			} else if (direct == 'up-right'){
 				canvasWidth     = Math.abs(tailX - (bubbleX + baseTailX));
@@ -122,7 +126,7 @@ function Bubble(containerId){
 
 			canvasStyleTop = -(canvasHeight) + 1;
 
-		} else if (tailY > (bubbleY + textHeight + textAura)){
+		} else if (((tailY > (bubbleY + textHeight + textAura)) && !directCust)  || directCust == 'down'){
 			direct = 'down';
 
 			// Уменьшаем ширину основания хвоста, если текстовый блок слишком маленький
@@ -143,7 +147,7 @@ function Bubble(containerId){
 				canvasWidth     = realBaseTailWidth;
 				canvasHeight    = Math.abs(tailY - baseTailY);
 				canvasStyleLeft = baseTailX;
-				canvasTailX     = tailX - (bubbleX + baseTailX);
+				tailXSpec     = tailX - (bubbleX + baseTailX);
 
 			} else if (direct == 'down-right'){
 				canvasWidth     = Math.abs(tailX - (bubbleX + baseTailX));
@@ -153,7 +157,7 @@ function Bubble(containerId){
 
 			canvasStyleTop = textHeight - 1;
 
-		} else if (tailX < bubbleX - textAura){
+		} else if (((tailX < bubbleX - textAura) && !directCust)  || directCust == 'left'){
 			direct = 'left';
 
 			// Уменьшаем ширину основания хвоста, если текстовый блок слишком маленький
@@ -174,7 +178,7 @@ function Bubble(containerId){
 				canvasWidth     = Math.abs(tailX - bubbleX);
 				canvasHeight    = realBaseTailWidth;
 				canvasStyleTop  = baseTailY;
-				canvasTailY     = tailY - (bubbleY + baseTailY);
+				tailYSpec     = tailY - (bubbleY + baseTailY);
 
 			} else if (direct == 'left-down'){
 				canvasWidth     = Math.abs(tailX - bubbleX);
@@ -184,7 +188,7 @@ function Bubble(containerId){
 
 			canvasStyleLeft = -(canvasWidth) + 1;
 	
-		} else if (tailX > (bubbleX + textWidth + textAura)){
+		} else if (((tailX > (bubbleX + textWidth + textAura)) && !directCust)  || directCust == 'right'){
 			direct = 'right';
 
 			// Уменьшаем ширину основания хвоста, если текстовый блок слишком маленький
@@ -206,7 +210,7 @@ function Bubble(containerId){
 				canvasHeight    = realBaseTailWidth;
 				canvasStyleTop  = baseTailY;
 
-				canvasTailY     = tailY - (bubbleY + baseTailY);
+				tailYSpec     = tailY - (bubbleY + baseTailY);
 
 			} else if (direct == 'right-down'){
 				canvasWidth     = Math.abs(tailX - (bubbleX + textWidth));
@@ -228,16 +232,26 @@ function Bubble(containerId){
 
 		bubbleTail.setAttribute("width",  canvasWidth + "px");
 		bubbleTail.setAttribute("height", canvasHeight + "px");
-		bubbleTail.setAttribute("data-direct",  direct);
-		bubbleTail.setAttribute("data-baseTailWidth",  realBaseTailWidth);		
-		bubbleTail.setAttribute("data-x", canvasTailX);
-		bubbleTail.setAttribute("data-y", canvasTailY);
+
+
+		var pointsObject = _self.getPoints(direct, canvasWidth, canvasHeight, realBaseTailWidth, tailXSpec, tailYSpec, curveXCust, curveYCust);
+
+		var pointsJSON = JSON.stringify(pointsObject);
+
+		bubbleTail.setAttribute("path", pointsJSON);
+
+
 
 		// вставляем canvas
 		bubbleContainer.insertAdjacentElement("beforeEnd", bubbleTail);
 
 		// рисуем хвост
-		_self.drawTail(bubbleTail);
+		// if(curveX && curveY){
+		// 	alert('ahtung');
+		// } else{
+			_self.drawTail(bubbleTail);
+		// }
+			
 
 		//возвращаем созданный элемент-контейнер нашего пузыря
 		return bubbleContainer;
@@ -272,7 +286,84 @@ function Bubble(containerId){
 	}
 
 	//
-	//отрисовка хвоста на холсте
+	//Получаем объект с координатам точек по которой будем рисовать хвост
+	//
+	this.getPoints = function(direct, width, height, baseTailWidth, xSpec, ySpec, curveXCust, curveYCust){
+		/*
+
+		*/
+		var p = {};
+
+		if(direct.search(/left/i) >= 0){
+			p.x1 = width - 1;
+			p.x2 = 0;
+		} else{
+			p.x1 = 1;
+			p.x2 = (direct == 'up' || direct == 'down') ? xSpec : width;
+		}
+
+		if(direct.search(/up/i) >= 0){
+			p.y1 = height;
+			p.y2 = 0;
+		} else{
+			p.y1 = 0;
+			p.y2 = (direct == 'left' || direct == 'right') ? ySpec : height;
+		}
+
+		if(direct.search(/left/i) == 0 || direct == 'up' || direct == 'down'){
+			p.x3 = width;
+		} else if(direct.search(/right/i) == 0){
+			p.x3 = 0;
+		} else if(direct.search(/right/i) > 0){
+			p.x3 = baseTailWidth;
+		} else if(direct.search(/left/i) > 0){
+			p.x3 = width - baseTailWidth;
+		}
+
+		if(direct.search(/up/i) == 0 || direct == 'left' || direct == 'right'){
+			p.y3 = height;
+		} else if(direct.search(/down/i) == 0){
+			p.y3 = 0;
+		} else if(direct.search(/down/i) > 0){
+			p.y3 = baseTailWidth;
+		} else if(direct.search(/up/i) > 0){
+			p.y3 = height - baseTailWidth;
+		}
+
+		//Если коэффициенты координат точки изгиба заданы явно, то используем их
+		if(curveXCust !== undefined || curveYCust !== undefined){
+			//Проверяем корректность коэффициентов, т.е. вхождение в промежуток [0, 1]
+			if(!(curveXCust < 0 || curveXCust > 1 || curveYCust < 0 || curveYCust > 1)){
+				//Вычисляем координаты
+				p.xBezier = Math.round(width  * curveXCust);
+				p.yBezier = Math.round(height * curveYCust);
+
+				return p;
+			}
+		}
+
+
+		//Иначе определяем координаты точки изгиба кривой по умолчанию
+		if(direct == 'up' || direct == 'down' || direct.search(/left/i) == 0 || direct.search(/right/i) == 0){
+			p.xBezier = width / 2;
+		} else if (direct.search(/left/i) > 0){
+			p.xBezier = width;
+		} else if (direct.search(/right/i) > 0){
+			p.xBezier = 0;
+		}
+
+		if(direct.search(/up/i) > 0 || direct.search(/down/i) > 0){
+			p.yBezier = 0;
+		} else{
+			p.yBezier = height/2;
+		} 
+
+		return p;
+
+	}
+
+	//
+	// Отрисовка хвоста на холсте
 	//
 	this.drawTail = function(canvas, backGroundColor, borderColor){
 		/*
@@ -281,10 +372,7 @@ function Bubble(containerId){
 		borderColor     - цвет линий (если не передан, берет с объекта)
 		*/
 
-		var width  = parseFloat(canvas.getAttribute("width"));
-		var height = parseFloat(canvas.getAttribute("height"));
-		var direct = canvas.getAttribute("data-direct");
-		var baseTailWidth = canvas.getAttribute("data-baseTailWidth");
+		var p = JSON.parse(canvas.getAttribute("path"));
 
 		backGroundColor = backGroundColor || _self.backGroundColor;
 		borderColor     = borderColor || _self.borderColor;
@@ -294,132 +382,14 @@ function Bubble(containerId){
 		var ctx = canvas.getContext('2d');
 
 		//Очищаем canvas
-		ctx.clearRect(0, 0, width, height);
+		ctx.clearRect(0, 0, canvas.getAttribute("width"), canvas.getAttribute("height"));
 
 		ctx.beginPath();
 
-		//отрисовываем хвост в зависимости от направления
-		switch(direct){
-			case 'no':
-				//ничего не делаем
-				return;
-			break
-			case 'up-left':
-				// alert('up-left');
+		ctx.moveTo(p.x1, p.y1);
 
-				ctx.moveTo(width - 1, height);  // отступ в 1 пиксель по оси X сделан специально, иначе часть изгиба кривой не видно
-
-				ctx.quadraticCurveTo(width, height/2, 0, 0);
-				ctx.quadraticCurveTo(width, height/2, width - baseTailWidth, height);
-			break
-
-			case 'up':
-				// alert('up');
-
-				var x = canvas.dataset.x;
-				ctx.moveTo(0, height);		
-		
-				ctx.quadraticCurveTo(width/2, height/2, x, 0);
-				ctx.quadraticCurveTo(width/2, height/2, width, height);
-			break
-
-			case 'up-right':
-				// alert('up-right');
-
-				ctx.moveTo(1, height); // отступ в 1 пиксель по оси X сделан специально, иначе часть изгиба кривой не видно
-		
-				ctx.quadraticCurveTo(0, height/2, width, 0);
-				ctx.quadraticCurveTo(0, height/2, baseTailWidth, height);
-			break			
-			
-			case 'down-left':
-				// alert('down-left');
-
-				ctx.moveTo(width - 1, 0);  // отступ в 1 пиксель по оси X сделан специально, иначе часть изгиба кривой не видно
-
-				ctx.quadraticCurveTo(width, height/2, 0, height);
-				ctx.quadraticCurveTo(width, height/2, width - baseTailWidth, 0);
-			break
-
-			case 'down':
-				// alert('down');
-
-				var x = canvas.dataset.x;
-				ctx.moveTo(0, 0);
-		
-				ctx.quadraticCurveTo(width/2, height/2, x, height);
-				ctx.quadraticCurveTo(width/2, height/2, width, 0);
-			break
-
-			case 'down-right':
-				// alert('down-right');
-
-				ctx.moveTo(1, 0); // отступ в 1 пиксель по оси X сделан специально, иначе часть изгиба кривой не видно
-		
-				ctx.quadraticCurveTo(0, height/2, width, height);
-				ctx.quadraticCurveTo(0, height/2, baseTailWidth, 0);
-			break
-
-			case 'left-up':
-				// alert('left-up');
-
-				ctx.moveTo(width, height);
-		
-				ctx.quadraticCurveTo(width/2, 0, 0, 0);
-				ctx.quadraticCurveTo(width/2, 0, width, height - baseTailWidth);
-			break
-
-			case 'left':
-				// alert('left');
-
-				var y = canvas.dataset.y;
-				ctx.moveTo(width, 0);
-		
-				ctx.quadraticCurveTo(width/2, height/2, 0, y);
-				ctx.quadraticCurveTo(width/2, height/2, width, height);
-			break
-
-			case 'left-down':
-				// alert('left-down');
-
-				ctx.moveTo(width, 0);
-		
-				ctx.quadraticCurveTo(width/2, 0, 0, height);
-				ctx.quadraticCurveTo(width/2, 0, width, baseTailWidth);
-			break
-
-			case 'right-up':
-				// alert('right-up');
-
-				ctx.moveTo(0, height);
-		
-				ctx.quadraticCurveTo(width/2, 0,  width, 0);
-				ctx.quadraticCurveTo(width/2, 0, 0, height - baseTailWidth);
-			break
-
-			case 'right':
-				// alert('right');
-
-				var y = canvas.dataset.y;
-				ctx.moveTo(0, 0);
-		
-				ctx.quadraticCurveTo(width/2, height/2, width, y);
-				ctx.quadraticCurveTo(width/2, height/2, 0, height);
-			break
-
-			case 'right-down':
-				// alert('right-down');
-
-				ctx.moveTo(0, 0);
-		
-				ctx.quadraticCurveTo(width/2, 0, width, height);
-				ctx.quadraticCurveTo(width/2, 0, 0, baseTailWidth);
-			break
-
-			default:
-				alert('undefined direct - ' + direct);
-			break
-		}
+		ctx.quadraticCurveTo(p.xBezier, p.yBezier, p.x2, p.y2);
+		ctx.quadraticCurveTo(p.xBezier, p.yBezier, p.x3, p.y3);
 
 		// Границы
 		ctx.strokeStyle = borderColor;

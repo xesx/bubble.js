@@ -1,5 +1,6 @@
 ﻿.bubbleContainer{
 	position: absolute;
+	display: inline-block;
 }
 .bubbleText{
 	background-color: #fff;
@@ -13,10 +14,7 @@
 .bubbleTextShine{
 	box-shadow: 0 0 3px 0px #FFF;
 }
-.bubbleText a{
-	color: inherit;
-	text-decoration: none;
-}
+
 canvas.bubbleTail{
 	position: absolute;
 }

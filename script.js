@@ -3,25 +3,27 @@ window.onload = function(){
     var cont = document.getElementById("cont");
     var bubble = new Bubble(cont);
 
-
+    bubble.textMaxWidth = 150;
     //test
 
-    //up
-    // var div = bubble.create("qws", 200, 200, 100, 50);
-    // var div = bubble.create("test qweqwe qweqwe qweqwe ", 200, 200, 250, 50);
-    // var div = bubble.create(" tetetsttdtsdsdfdsfsdfsdf fdsfsdf fsdfsdf ываываыва sffs dtd ddfdfd", 200, 200, 300, 50);
-    //down
-	// var div = bubble.create("test qweqwe qweqwe qweqwe ", 200, 200, 100, 450);
-	// var div = bubble.create("tetetsttdtsdsdfdsfsdfsdf fdsfsdf fsdfsdf ываываыва sffs dtd ddfdfd", 200, 200, 250, 450);
-	// var div = bubble.create("test qweqwe qweqwe qweqwe ", 200, 200, 300, 450);
+    //right
+    var div = bubble.create("test test test test ", 0, 0, 240, 200);
+    var div = bubble.create("test test ", 0, 171, 240, 200);
+    var div = bubble.create("test test test test test test test ", 0, 300, 240, 200);
+ //    //up
+	var div = bubble.create("test test test test test test test test", 0, 420, 240, 200, 1, 0.5);
+	var div = bubble.create("test test test test test test", 160, 420, 240, 200, 0, 0, 'up');
+    var div = bubble.create("test test test", 350, 420, 240, 200);
+
 	//left
-	// var div = bubble.create("tetetst tdtsd sdfdsfs  tdtsd sdfd tdtsd sdfd tdtsd sdfddfsdf fd", 200, 200, 50, 200);
-	// var div = bubble.create("tetetsttdtsdsdfdsfsdfsdf fdsfsdf fsdfsdf ываываыва sffs dtd ddfdfd", 200, 200, 50, 230);
-	// var div = bubble.create("tetetsttdtsdsdfdsfdddddddddddddddddddddddddddыыыыыыыыыыыыыыdsdfsdf fdsfsdf fsdfsdf ываываыва sffs dtd ddfdfd", 200, 200, 50, 250);
-	//right
-	// var div = bubble.create("tetetst tdtsd sdfdsfs  tdtsd sdfd tdtsd sdfd tdtsd sdfd", 200, 200, 450, 200);
-	// var div = bubble.create("test qweqwe qwetetetsttdtsdsdfdsfdddddddddddddddddddddddddddыыыыыыыыыыыыыыdsdfsdfqwe qweqwe ", 200, 200, 450, 240);
-	var div = bubble.create("test word", 200, 200, 450, 450);
+	var div = bubble.create("test test test", 400, 345, 240, 200);
+    var div = bubble.create("test test test", 400, 200, 240, 200);
+    var div = bubble.create("test test test test test test", 350, 100, 240, 200);
+	//down
+	var div = bubble.create("test test test test test test", 350, 0, 240, 200, 0, 0.2, 'left');
+    var div = bubble.create("test test test", 120, 0, 240, 200, 0, 0);
+
+
 
 	var divt = div.getElementsByClassName('bubbleText')[0];
 
