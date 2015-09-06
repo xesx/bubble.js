@@ -10,17 +10,18 @@ window.onload = function(){
     var div = bubble.create("test test test test ", 0, 0, 240, 200);
     var div = bubble.create("test test ", 0, 171, 240, 200);
     var div = bubble.create("test test test test test test test ", 0, 300, 240, 200);
- //    //up
-	var div = bubble.create("test test test test test test test test", 0, 420, 240, 200, 1, 0.5);
+    
+    //up
+	var div = bubble.create("test test test test test test test test", 0, 420, 240, 200, {curveX : 1, curveY : 0.4});
 	var div = bubble.create("test test test test test test", 160, 420, 240, 200, 0, 0, 'up');
     var div = bubble.create("test test test", 350, 420, 240, 200);
 
 	//left
 	var div = bubble.create("test test test", 400, 345, 240, 200);
-    var div = bubble.create("test test test", 400, 200, 240, 200);
+    var div = bubble.create("test test test", 400, 200, 240, 200, {curveX : 0.5, curveY : 1});
     var div = bubble.create("test test test test test test", 350, 100, 240, 200);
 	//down
-	var div = bubble.create("test test test test test test", 350, 0, 240, 200, 0, 0.2, 'left');
+	var div = bubble.create("test test test test test test", 350, 5, 240, 200, {direct : 'left'});
     var div = bubble.create("test test test", 120, 0, 240, 200, 0, 0);
 
 

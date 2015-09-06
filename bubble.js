@@ -13,17 +13,29 @@ function Bubble(containerId){
 	this.backGroundColor = '#FFF' // цвет заливки (по умолчанию белый)
 	this.borderColor     = '#000' // цвет границ (по умолчанию черный)
 
-	this.create = function(text, bubbleX, bubbleY, tailX, tailY, curveXCust, curveYCust, directCust){
+	this.create = function(text, bubbleX, bubbleY, tailX, tailY, Customize){
 		/*
 		text           - непосредственно текст (text)
 		bubbleX        - 
 		bubbleY        - координаты для верхнего левого края текстового блока в пикселах, относительно containerId (int, float)
 		tailX          - 
 		tailY          - координаты для окончания хвоста в пикселах, относительно containerId (int, float)
-		curveXCust     - 
-		curveYCust     - кооэфициент для координат точки изгиба гривых хвоста (от 0 до 1; если не передан, то берется по умолчанию)
-		directCust     - сторона текстового блока из которой будет "расти" хвост (если не задан, то определяется по умолчанию)
+
+		Customize      - объект в котором можно явно задать свойства определяемые автоматически
+			.curveXCust     -
+			.curveYCust     - кооэфициент для координат точки изгиба гривых хвоста (от 0 до 1; если не передан, то берется по умолчанию)
+			.directCust     - сторона текстового блока из которой будет "расти" хвост (если не задан, то определяется по умолчанию)
 		*/
+
+		var curveXCust = undefined;
+		var curveYCust = undefined;
+		var directCust = undefined;
+
+		if(Customize){
+			curveXCust = Customize.curveX = Customize.curveX || undefined;
+			curveYCust = Customize.curveY = Customize.curveY || undefined;
+			directCust = Customize.direct = Customize.direct || undefined;			
+		}		
 
 		//контейнер
 		var bubbleContainer = document.createElement("div");
@@ -125,6 +137,7 @@ function Bubble(containerId){
 			}
 
 			canvasStyleTop = -(canvasHeight) + 1;
+			canvasHeight += 1;
 
 		} else if (((tailY > (bubbleY + textHeight + textAura)) && !directCust)  || directCust == 'down'){
 			direct = 'down';
@@ -155,7 +168,8 @@ function Bubble(containerId){
 				canvasStyleLeft = baseTailX;
 			}
 
-			canvasStyleTop = textHeight - 1;
+			canvasStyleTop = textHeight - 2;
+			canvasHeight += 2;
 
 		} else if (((tailX < bubbleX - textAura) && !directCust)  || directCust == 'left'){
 			direct = 'left';
@@ -187,6 +201,7 @@ function Bubble(containerId){
 			}
 
 			canvasStyleLeft = -(canvasWidth) + 1;
+			canvasWidth += 1;
 	
 		} else if (((tailX > (bubbleX + textWidth + textAura)) && !directCust)  || directCust == 'right'){
 			direct = 'right';
@@ -219,6 +234,7 @@ function Bubble(containerId){
 			}
 
 			canvasStyleLeft = (textWidth) - 1;
+			canvasWidth += 1;
 
 		} else {
 			// кординаты конца хвоста внутри текстового блока
@@ -303,10 +319,10 @@ function Bubble(containerId){
 		}
 
 		if(direct.search(/up/i) >= 0){
-			p.y1 = height;
+			p.y1 = height - 1;
 			p.y2 = 0;
 		} else{
-			p.y1 = 0;
+			p.y1 = 1;
 			p.y2 = (direct == 'left' || direct == 'right') ? ySpec : height;
 		}
 
