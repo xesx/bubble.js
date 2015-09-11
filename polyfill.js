@@ -23,18 +23,20 @@ if (typeof HTMLElement != "undefined" && !HTMLElement.prototype.insertAdjacentEl
             break;
         }
     }
+}
 
+if (typeof HTMLElement != "undefined" && !HTMLElement.prototype.insertAdjacentHTML){
     HTMLElement.prototype.insertAdjacentHTML = function(where, htmlStr) {
         var r = this.ownerDocument.createRange();
         r.setStartBefore(this);
         var parsedHTML = r.createContextualFragment(htmlStr);
         this.insertAdjacentElement(where, parsedHTML);
     }
+}
 
-
+if (typeof HTMLElement != "undefined" && !HTMLElement.prototype.insertAdjacentText){
     HTMLElement.prototype.insertAdjacentText = function(where, txtStr) {
         var parsedText = document.createTextNode(txtStr);
         this.insertAdjacentElement(where, parsedText);
     }
-
 }

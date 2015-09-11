@@ -1,58 +1,57 @@
 window.onload = function(){
 
+    
+    content();
+
+    // window.addEventListener("resize", content)
+}
+
+function content(){
     var cont = document.getElementById("cont");
+
+    cont.innerHTML = '';
+
     var bubble = new Bubble(cont);
+
+    // debugger
 
     bubble.textMaxWidth = 150;
     //test
 
-    //right
-    var div = bubble.create("test test test test ", 0, 0, 240, 200);
-    var div = bubble.create("test test ", 0, 171, 240, 200);
-    var div = bubble.create("test test test test test test test ", 0, 300, 240, 200);
+    var settings = {textAura: 50, addWidth: 50};
     
-    //up
-	var div = bubble.create("test test test test test test test test", 0, 420, 240, 200, {curveX : 1, curveY : 0.4});
-	var div = bubble.create("test test test test test test", 160, 420, 240, 200, 0, 0, 'up');
-    var div = bubble.create("test test test", 350, 420, 240, 200);
+    var div = bubble.create("down right", 100, 10, 240, 200, settings);
+    var div = bubble.create("down down" , 195, 10, 240, 200, settings);
+    var div = bubble.create("down left" , 300, 10, 240, 200, settings);
+    
+    var div = bubble.create("right down" , 0, 130, 240, 200, settings);
+    var div = bubble.create("right right", 0, 175, 240, 200, settings);
+    var div = bubble.create("right up "  , 0, 230, 240, 200, {textAura: 50, addWidth: 50, p3: [0.5,1]});
 
-	//left
-	var div = bubble.create("test test test", 400, 345, 240, 200);
-    var div = bubble.create("test test test", 400, 200, 240, 200, {curveX : 0.5, curveY : 1});
-    var div = bubble.create("test test test test test test", 350, 100, 240, 200);
-	//down
-	var div = bubble.create("test test test test test test", 350, 5, 240, 200, {direct : 'left'});
-    var div = bubble.create("test test test", 120, 0, 240, 200, 0, 0);
+    var div = bubble.create("up__ right" , 100, 400, 240, 200, settings);
+    var div = bubble.create("up up up up", 195, 400, 240, 200, settings);
+    var div = bubble.create("up__ left"  , 300, 400, 240, 200, settings);
+
+    var div = bubble.create("left_ down" , 450, 130, 240, 200, settings);
+    var div = bubble.create("left_ left_", 450, 175, 240, 200, settings);
+    var div = bubble.create("left_ up "  , 450, 230, 240, 200, {textAura: 50, addWidth: 50, p3: [0.5,1]});
 
 
+ //    var div = bubble.create("test test test test test test testww ", 0, 300, 240, 200, {baseTail: 0.6, p3: [0, 0.2]});
 
-	var divt = div.getElementsByClassName('bubbleText')[0];
+     // var div = bubble.create("right down" , 0, 165, 240, 200, {direct: 'right', borderWidth: 1, addWidth: 100});
+    
+ // // // // // //    //up
+ //    var div = bubble.create("test test test test", 0, 420, 240, 200, {p3 : [1, 0.7], baseTail : 1
+ //        , baseTailWidth: 30, offset: 5, textMaxWidth: 200, zIndex: 9000});
+ //    var div = bubble.create("test test test test test test3", 160, 420, 240, 200, {baseTail: 0, p3 : [0.9, 0.7], offset: 5});
+ //    var div = bubble.create("test", 240, 200, 240, 200, {p3: [1, 0], borderRadius: 0});
 
-    divt.addEventListener("mouseenter", 
-    	function(){
-    		// alert("test" + this.style.backGroundColor);
-    		// this.style.backgroundColor = 'blue';
-    		var bubbleText = this;
-    		var bubbleTail = this.parentNode.getElementsByClassName('bubbleTail')[0];
-
-    		bubbleText.style.backgroundColor = "#ff9";
-    		bubbleText.classList.add("bubbleTextShine");
-
-    		bubble.drawTail(bubbleTail, "#ff9", "#FFF");
-
-    	})
-
-    divt.addEventListener("mouseleave", 
-    	function(){
-    		// alert("test" + this.style.backGroundColor);
-    		// this.style.backgroundColor = 'blue';
-    		var bubbleText = this;
-    		var bubbleTail = this.parentNode.getElementsByClassName('bubbleTail')[0];
-
-    		bubbleText.style.backgroundColor = "#fff";
-    		bubbleText.classList.remove("bubbleTextShine");
-
-    		bubble.drawTail(bubbleTail, "#fff");
-
-    	})
+ // // //    // //left
+ //    var div = bubble.create("test test test", 400, 345, 240, 200);
+ //    var div = bubble.create("test test test test test test test test test", 400, 200, 240, 200, {p3 : [0.5, 0], baseTail: 1});
+ //    var div = bubble.create("I<b>'m</b> 22", 350, 100, 240, 200, {direct: 'left', backgroundColor: '#FFF', borderColor: '#FFF'});
+ // //    // //down
+ //    var div = bubble.create("test test test test test testdd", 300, 5, 240, 200, {baseTail: 0.5, textMaxWidth: 120});
+ //    var div = bubble.create("test test testddd", 120, 0, 250, 23, {baseTail : 1, baseTailWidth: 330, offset: 5});
 }
