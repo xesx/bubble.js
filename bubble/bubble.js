@@ -307,7 +307,6 @@ function Bubble(areaId){
 
 		// рисуем хвост
 		_self.drawTail(bubbleTail, prop['backgroundColor'], prop['borderWidth'], prop['borderColor'], direct, prop['addWidth'], Path);
-			
 
 		//возвращаем созданный элемент-контейнер нашего пузыря
 		return bubbleContainer;
@@ -350,22 +349,24 @@ function Bubble(areaId){
 			Params.maxBaseTailWidth = Params.straightBorderArea;
 
 		} else if(Params.realTailOffset < Params.realBorderRadius){
-			Params.maxBaseTailWidth = 2 * Math.sqrt(Math.pow(Params.realBorderRadius, 2) - Math.pow(Params.realBorderRadius - Params.realTailOffset, 2)) + Params.straightBorderArea;
+			Params.maxBaseTailWidth = 2 * Math.sqrt(Math.pow(Params.realBorderRadius, 2) - Math.pow(Params.realBorderRadius - offset, 2)) + Params.straightBorderArea;
 
 		} else if(Params.realTailOffset < otherBorder - Params.realBorderRadius){
 			Params.maxBaseTailWidth = targetBorder;
 
 		} else if(Params.realTailOffset < otherBorder){
-			Params.maxBaseTailWidth = 2 * Math.sqrt(Math.pow(Params.realBorderRadius, 2) - Math.pow(Params.realBorderRadius - (otherBorder - Params.realTailOffset), 2)) + Params.straightBorderArea; 
+			Params.maxBaseTailWidth = 2 * Math.sqrt(Math.pow(Params.realBorderRadius, 2) - Math.pow(Params.realBorderRadius - (otherBorder - offset), 2)) + Params.straightBorderArea; 
 		}
 
 		Params.maxBaseTailWidth = Math.floor(Params.maxBaseTailWidth);
 
 		//Отступ, от границы контейнера, до места где может начинаться хвост
-		Params.minBaseTailStart = (targetBorder - Params.maxBaseTailWidth) / 2;
+		Params.minBaseTailStart = ((targetBorder - Params.maxBaseTailWidth) / 2);
 
 		//Реальная ширина хвоста
 		Params.realBaseTailWidth = (baseTailWidth > Params.maxBaseTailWidth) ? Params.maxBaseTailWidth : baseTailWidth;
+
+		// debugger
 
 		return Params;
 	}

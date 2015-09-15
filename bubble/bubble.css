@@ -9,7 +9,6 @@
 	box-shadow: 0 0 3px 0px #000;
 	cursor: pointer;
 	border-style: solid;
-	/*position: relative;*/
 }
 .bubbleTextContent{
 	border-radius: inherit;
@@ -19,10 +18,6 @@
 .bubbleTextContent span{
 	position: relative;
 }
-.bubbleTextShine{
-	box-shadow: 0 0 5px 0px #FFF;
-}
-
 svg.bubbleTail{
 	position: absolute;
 	z-index: 99;

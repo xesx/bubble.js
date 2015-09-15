@@ -1,9 +1,5 @@
 window.onload = function(){
-
-    
     content();
-
-    // window.addEventListener("resize", content)
 }
 
 function content(){
@@ -13,12 +9,9 @@ function content(){
 
     var bubble = new Bubble(cont);
 
-    // debugger
-
     bubble.textMaxWidth = 150;
-    //test
 
-    var settings = {textAura: 50, addWidth: 50};
+    var settings = {textAura: 50, addWidth: 150, baseTail: 0.5, baseTailWidth: 20};
     
     var div = bubble.create("down right", 100, 10, 240, 200, settings);
     var div = bubble.create("down down" , 195, 10, 240, 200, settings);
@@ -38,20 +31,14 @@ function content(){
 
 
  //    var div = bubble.create("test test test test test test testww ", 0, 300, 240, 200, {baseTail: 0.6, p3: [0, 0.2]});
-
-     // var div = bubble.create("right down" , 0, 165, 240, 200, {direct: 'right', borderWidth: 1, addWidth: 100});
-    
- // // // // // //    //up
+ //    var div = bubble.create("right down" , 0, 165, 240, 200, {direct: 'right', borderWidth: 1, addWidth: 100});
  //    var div = bubble.create("test test test test", 0, 420, 240, 200, {p3 : [1, 0.7], baseTail : 1
  //        , baseTailWidth: 30, offset: 5, textMaxWidth: 200, zIndex: 9000});
  //    var div = bubble.create("test test test test test test3", 160, 420, 240, 200, {baseTail: 0, p3 : [0.9, 0.7], offset: 5});
  //    var div = bubble.create("test", 240, 200, 240, 200, {p3: [1, 0], borderRadius: 0});
-
- // // //    // //left
  //    var div = bubble.create("test test test", 400, 345, 240, 200);
  //    var div = bubble.create("test test test test test test test test test", 400, 200, 240, 200, {p3 : [0.5, 0], baseTail: 1});
  //    var div = bubble.create("I<b>'m</b> 22", 350, 100, 240, 200, {direct: 'left', backgroundColor: '#FFF', borderColor: '#FFF'});
- // //    // //down
  //    var div = bubble.create("test test test test test testdd", 300, 5, 240, 200, {baseTail: 0.5, textMaxWidth: 120});
  //    var div = bubble.create("test test testddd", 120, 0, 250, 23, {baseTail : 1, baseTailWidth: 330, offset: 5});
 }
