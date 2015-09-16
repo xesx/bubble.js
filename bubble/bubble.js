@@ -17,7 +17,6 @@ function Bubble(areaId){
 	,	borderColor       : '#000'      // цвет границ хвоста и текстового блока (по умолчанию черный)
 	,	offset            : 1           // смещение основания хвоста(т.е. всего canvas-а) внутрь текстового блока		
 	,	addWidth          : 5           // отступы в svg-элементе
-	,	zIndex            : undefined   // z-index блока (по умолчанию индекс для каждого ноа=вого пузыря на 1 больше предыдущего)
 	}
 
 	this.currentZIndex = 1000;
@@ -71,14 +70,6 @@ function Bubble(areaId){
 
 		//ширина
 		bubbleContainer.style.width = parseInt(prop['textMaxWidth']) + "px";
-
-		// У каждого нового пузыря должен быть новый z-index, если не указан явно
-		if(prop['zIndex'] === undefined){
-			bubbleContainer.style.zIndex = _self.currentZIndex;
-			_self.currentZIndex += 1;			
-		} else {
-			bubbleContainer.style.zIndex = prop['zIndex'];
-		}
 
 		//Создаем текстовый блок
 		var bubbleText = document.createElement("div");
