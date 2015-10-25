@@ -15,7 +15,7 @@ function Bubble(areaId){
 	,	baseTailWidth     : 10          // ширина основания хвоста
 	,	backgroundColor   : '#FFF'      // цвет заливки хвоста и текстового блока (по умолчанию белый)
 	,	borderColor       : '#000'      // цвет границ хвоста и текстового блока (по умолчанию черный)
-	,	offset            : 1           // смещение основания хвоста(т.е. всего canvas-а) внутрь текстового блока		
+	,	offset            : 1           // смещение основания хвоста(т.е. всего svg элемента) внутрь текстового блока		
 	,	addWidth          : 5           // отступы в svg-элементе
 	}
 
@@ -140,7 +140,7 @@ function Bubble(areaId){
 		var svgLeft;
 		var svgTop;
 
-		//Специальные координаты конца хвоста в самом canvas-е для direct in ('up', 'down', 'left', 'right')
+		//Специальные координаты конца хвоста в svg элементе, для direct in ('up', 'down', 'left', 'right')
 		var tailXSpec = 0; // понадобится для direct in ('up', 'down')
 		var tailYSpec = 0; // понадобится для direct in ('left', 'right')
 
@@ -289,9 +289,6 @@ function Bubble(areaId){
 
 		// Преобразуем объект в формат JSON
 		var pointsJSON = JSON.stringify(Path);
-
-		// записываем JSON-строку в атрибут path нашего canvas-а
-		bubbleTail.setAttribute("path", pointsJSON);
 
 		// вставляем svg
 		bubbleContainer.insertAdjacentElement("beforeEnd", bubbleTail);
