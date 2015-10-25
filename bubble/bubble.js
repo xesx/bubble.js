@@ -19,8 +19,6 @@ function Bubble(areaId){
 	,	addWidth          : 5           // отступы в svg-элементе
 	}
 
-	this.currentZIndex = 1000;
-
 	this.create = function(text, bubbleX, bubbleY, tailX, tailY, Customize){
 		/*
 		text           - непосредственно текст (text)
