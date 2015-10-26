@@ -13,7 +13,7 @@ function Bubble(areaId){
 	,	borderRadius      : 40          // радиус скругления углов границ
 	,	fill              : "#FFFFFF"   // цвет заливки (color)
 	,	shadowColor       : "#000000"   // цвет тени (color)
-	,	shadowBlurRadius  : 0           // радиус размытия тени (number)
+	,	shadowBlurRadius  : 5           // радиус размытия тени (number)
 	}
 
 	this.create = function(text, bubbleX, bubbleY, optionsCustom){
@@ -51,6 +51,7 @@ function Bubble(areaId){
 		var bodyWidth  = textWidth + _self.options.textPadding * 2;
 		var bodyHeight = textHeight + _self.options.textPadding * 2;
 
+		//отступ
 		var indent = _self.options.borderWidth + _self.options.shadowBlurRadius * 3;
 
 		// Устанавливаем элементу svg атрибуты
@@ -64,10 +65,10 @@ function Bubble(areaId){
 		var radius = _self.getBorderRadius(bodyWidth, bodyHeight, _self.options.borderRadius);
 
 		// атрибут d для Body
-		var dBody = _self.getDForBody(indent, indent, bodyWidth, bodyHeight, radius);
+		var dBody = _self.getDForBody(svg, indent, indent, bodyWidth, bodyHeight, radius);
 
 		// фильтр для тени
-		var filter ="<defs><filter id=\"shadow\"><feGaussianBlur stdDeviation=\"" + 2 + "\"/></filter></defs>";
+		var filter ="<defs><filter id=\"shadow\"><feGaussianBlur stdDeviation=\"" + _self.options.shadowBlurRadius + "\"/></filter></defs>";
 
 		// стиль для тени
 		var styleShadow = "\"stroke:" + "none" + ";stroke-width:" + "0" + "px;fill:" + _self.options.borderColor + "\"";
@@ -95,19 +96,28 @@ function Bubble(areaId){
 	//
 	//Формирование атрибута d для тела пузыря
 	//
-	this.getDForBody = function(xStart, yStart, bodyWidth, bodyHeight, radius){
+	this.getDForBody = function(svg, xStart, yStart, bodyWidth, bodyHeight, radius){
 		/*
+		svg            - svg-элемент для которого создается path
 		xStart, yStart - координаты левого верхнего угла (без учета borderRadius) в рамках svg-элемента
-		bodyWidth  - ширина пузыря
-		bodyHeight - высота пузыря
-		radius     - радиус скругления углов границ пузыря
+		bodyWidth      - ширина пузыря
+		bodyHeight     - высота пузыря
+		radius         - радиус скругления углов границ пузыря
 		*/
+
+		// Ширина и высота svg-элемента
+		var svgWidth  = parseInt(svg.style.width);
+		var svgHeight = parseInt(svg.style.height);
 
 		//длина прямых частей границ
 		var horisontalStreight = (bodyWidth - radius * 2);
 		var verticalStreight   = (bodyHeight - radius * 2);
 		
 		var d   = "";
+		//Проходимся по все углам элемента чтобы при отрисовке path рисунок не обрезался
+		//Особенно заметно отсутствие этой строки при большом значении shadowBlurRadius
+		d += "M0,0 M" + svgWidth + ",0 M" + svgWidth + "," + svgHeight + " M0," + svgHeight + " ";
+
 		d += "M" + (xStart + radius) + "," + yStart + " a" + radius + "," + radius + " 0 0 0 " + (-radius) + "," + radius + " ";
 		d += "v" + "0," + verticalStreight + " ";
 		d += "a" + radius + "," + radius + " 0 0 0 " + radius + "," + radius + " ";
