@@ -8,12 +8,12 @@ function Bubble(areaId){
 		textMaxWidth      : 200         // максимальная ширина текстового блока в пикселях (number)
 	,	textPadding       : 20          // отступ от края пузыря до текста в пикселях (number)
 	,	textAlign         : "center"    // выравнивание текста (string)
-	,	borderWidth       : 1           // ширина границ (number)
+	,	borderWidth       : 0           // ширина границ (number)
 	,	borderColor       : "#000000"   // цвет границ (color)
 	,	borderRadius      : 40          // радиус скругления углов границ
 	,	fill              : "#FFFFFF"   // цвет заливки (color)
 	,	shadowColor       : "#000000"   // цвет тени (color)
-	,	shadowBlurRadius  : 5           // радиус размытия тени (number)
+	,	shadowBlurRadius  : 2           // радиус размытия тени (number)
 	}
 
 	this.create = function(text, bubbleX, bubbleY, optionsCustom){
