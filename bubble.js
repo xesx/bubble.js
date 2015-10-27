@@ -1,28 +1,42 @@
 function Bubble(areaId){
 	var _self = this;
 	
-	this.areaId     = areaId; // Контейнер. Это должен быть элемент с position != static, поскольку относительно него будут задаваться координаты
+	this.areaId     = getNotStaticElement(areaId); // Контейнер. Это должен быть элемент с position != static, поскольку относительно него будут задаваться координаты
 
 	//Свойства по умолчанию
 	this.optionsDefault = {
-		textMaxWidth      : 200         // максимальная ширина текстового блока в пикселях (number)
-	,	textPadding       : 20          // отступ от края пузыря до текста в пикселях (number)
-	,	textAlign         : "center"    // выравнивание текста (string)
-	,	borderWidth       : 0           // ширина границ (number)
-	,	borderColor       : "#000000"   // цвет границ (color)
-	,	borderRadius      : 40          // радиус скругления углов границ
-	,	fill              : "#FFFFFF"   // цвет заливки (color)
-	,	shadowColor       : "#000000"   // цвет тени (color)
-	,	shadowBlurRadius  : 2           // радиус размытия тени (number)
+		textMaxWidth         : 200             // максимальная ширина текстового блока в пикселях (number)
+	,	textPadding          : 20              // отступ от края пузыря до текста в пикселях (number)
+	,	textAlign            : "center"        // выравнивание текста (string)
+	,	fontFamily           : "Comic Sans MS" // семейство шрифтов для текста (string)
+	,	fontSize             : 16              // размер шрифта в пикселях (number)
+	,	fontColor            : "#000000"       // цвет шрифта (color)
+	,	borderWidth          : 1               // ширина границ (number)
+	,	borderColor          : "#000000"       // цвет границ (color)
+	,	borderRadius         : 40              // радиус скругления углов границ
+	,	fill                 : "#FFFFFF"       // цвет заливки (color)
+	,	shadowColor          : "#000000"       // цвет тени (color)
+	,	shadowH              : 4               // смещение тени по горизонтали
+	,	shadowV              : 8               // смещение тени по вертикали
+	,	shadowBlurRadius     : 3               // радиус размытия тени (number)
+
+	,	tailBorderPosition   : 0.5             // коэффициент для положения основания хвоста (по умолчанию 0.5, т.е. хвост "растет" из середины ребра) (number in [0, 1])
+	,	tailWidth            : 10              // ширина основания хвоста в пикселях (number)
+
 	}
 
-	this.create = function(text, bubbleX, bubbleY, optionsCustom){
+	//Объект для свойств создаваемого пузыря, получаемый слиянием свойств по умолчанию + свойства заданные при вызове функции create в параметре optionsCustom
+	this.options = {};
+
+	this.create = function(text, xBody, yBody, xTail, yTail, optionsCustom){
 		/*
 		text           - текст (string)
-		bubbleX
-		bubbleY        - координаты для верхнего левого края текстового блока в пикселах, относительно areaId (number)
+		xBody, yBody   - координаты для верхнего левого края текстового блока в пикселах, относительно areaId (number)
+		xTail, yTail   - координаты конца хвоста в пикселах, относительно areaId (number)
 		optionsCustom  - объект со свойствами пузыря, если не задано свойство или вообще объект, то берется из _self.optionsDefault (object)
 		*/
+
+		//Обнуляем при создании нового пузыря
 
 		_self.options = {};
 
@@ -34,7 +48,14 @@ function Bubble(areaId){
 			_self.options[option] = (optionsCustom[option] === undefined) ? _self.optionsDefault[option] : optionsCustom[option];
 		}
 
-		var html = _self.createHTML(text, bubbleX, bubbleY);
+		//Записываем аргументы в options
+		_self.optionAdd("text", text);
+		_self.optionAdd("xBody", xBody);
+		_self.optionAdd("yBody", yBody);
+		_self.optionAdd("xTail", xTail);
+		_self.optionAdd("yTail", yTail);
+
+		var html = _self.createHTML(text, xBody, yBody);
 		var svg  = _self.createSVG(html);
 
 	}
@@ -45,14 +66,11 @@ function Bubble(areaId){
 	this.createSVG = function(html){
 		var svg = document.createElementNS("http://www.w3.org/2000/svg", 'svg');
 
-		var textWidth  = parseInt(html.textContainer.style.width);
-		var textHeight = parseInt(html.textContainer.style.height);
-
-		var bodyWidth  = textWidth + _self.options.textPadding * 2;
-		var bodyHeight = textHeight + _self.options.textPadding * 2;
+		var bodyWidth  = _self.optionAdd("bodyWidth", _self.options.textWidth + _self.options.textPadding * 2);
+		var bodyHeight = _self.optionAdd("bodyHeight", _self.options.textHeight + _self.options.textPadding * 2);
 
 		//отступ
-		var indent = _self.options.borderWidth + _self.options.shadowBlurRadius * 3;
+		var indent = _self.optionAdd("indent", _self.options.borderWidth + _self.options.shadowH + _self.options.shadowV + _self.options.shadowBlurRadius * 3);
 
 		// Устанавливаем элементу svg атрибуты
 		svg.style.position = "absolute";
@@ -62,48 +80,53 @@ function Bubble(areaId){
 		svg.style.height   = bodyHeight + indent * 2 +"px";
 
 		//Вычисляем реальный радиус скругления границ
-		var radius = _self.getBorderRadius(bodyWidth, bodyHeight, _self.options.borderRadius);
+		var realRadius = _self.optionAdd("realRadius", _self.getBorderRadius());
 
 		// атрибут d для Body
-		var dBody = _self.getDForBody(svg, indent, indent, bodyWidth, bodyHeight, radius);
+		var dBody = _self.getDForBody(svg, indent, indent);
+
+		var dBodyShadow = _self.getDForBody(svg, indent + _self.options.shadowH, indent + _self.options.shadowV);
 
 		// фильтр для тени
 		var filter ="<defs><filter id=\"shadow\"><feGaussianBlur stdDeviation=\"" + _self.options.shadowBlurRadius + "\"/></filter></defs>";
 
-		// стиль для тени
-		var styleShadow = "\"stroke:" + "none" + ";stroke-width:" + "0" + "px;fill:" + _self.options.borderColor + "\"";
-		// стиль для контура
-		var styleBorder = "\"stroke:" + _self.options.borderColor + ";stroke-width:" + _self.options.borderWidth + "px;fill:" + "none" + "\"";
-		// стиль для фона
-		var styleFill = "\"stroke:" + "none" + ";stroke-width:" + "0" + "px;fill:" + _self.options.fill + "\"";
+		// path для тени Body
+		var pathBodyShadow = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+		pathBodyShadow.setAttribute("d", dBodyShadow);
+		pathBodyShadow.setAttribute("filter", "url(#shadow)");
+		pathBodyShadow.style.fill = _self.options.shadowColor;
 
-		// путь для тени Body
-		var pathBodyShadow = "<path d = \"" + dBody + "\" style = " + styleShadow + " filter=\"url(#shadow)\"" + "/>";
-		// путь для контура Body
-		var pathBodyBorder = "<path d = \"" + dBody + "\" style = " + styleBorder + "/>";
-		// путь для фона Body
-		var pathBodyFill = "<path d = \"" + dBody + "\" style = " + styleFill + "/>";
+		// path для контура Body
+		var pathBodyBorder = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+		pathBodyBorder.setAttribute("d", dBody);
+		pathBodyBorder.style.stroke      = _self.options.borderColor;
+		pathBodyBorder.style.strokeWidth = _self.options.borderWidth;
+
+		// path для фона Body
+		var pathBodyFill = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+		pathBodyFill.setAttribute("d", dBody);
+		pathBodyFill.style.fill = _self.options.fill;
 
 		// вставляем в элемент svg
 		svg.insertAdjacentHTML("beforeEnd", filter);
-		svg.insertAdjacentHTML("beforeEnd", pathBodyShadow);
-		svg.insertAdjacentHTML("beforeEnd", pathBodyBorder);
-		svg.insertAdjacentHTML("beforeEnd", pathBodyFill);
+		svg.insertAdjacentElement("beforeEnd", pathBodyShadow);
+		svg.insertAdjacentElement("beforeEnd", pathBodyBorder);
+		svg.insertAdjacentElement("beforeEnd", pathBodyFill);
 
-		html.bubbleContainer.insertAdjacentElement("afterBegin", svg);
+		html.insertAdjacentElement("afterBegin", svg);
 	}
 
 	//
 	//Формирование атрибута d для тела пузыря
 	//
-	this.getDForBody = function(svg, xStart, yStart, bodyWidth, bodyHeight, radius){
+	this.getDForBody = function(svg, xStart, yStart){
 		/*
 		svg            - svg-элемент для которого создается path
 		xStart, yStart - координаты левого верхнего угла (без учета borderRadius) в рамках svg-элемента
-		bodyWidth      - ширина пузыря
-		bodyHeight     - высота пузыря
-		radius         - радиус скругления углов границ пузыря
 		*/
+		var bodyWidth  = _self.options.bodyWidth;
+ 		var bodyHeight = _self.options.bodyHeight;
+ 		var radius     = _self.options.realRadius;
 
 		// Ширина и высота svg-элемента
 		var svgWidth  = parseInt(svg.style.width);
@@ -114,9 +137,7 @@ function Bubble(areaId){
 		var verticalStreight   = (bodyHeight - radius * 2);
 		
 		var d   = "";
-		//Проходимся по все углам элемента чтобы при отрисовке path рисунок не обрезался
-		//Особенно заметно отсутствие этой строки при большом значении shadowBlurRadius
-		d += "M0,0 M" + svgWidth + ",0 M" + svgWidth + "," + svgHeight + " M0," + svgHeight + " ";
+		
 
 		d += "M" + (xStart + radius) + "," + yStart + " a" + radius + "," + radius + " 0 0 0 " + (-radius) + "," + radius + " ";
 		d += "v" + "0," + verticalStreight + " ";
@@ -126,6 +147,9 @@ function Bubble(areaId){
 		d += "v" + "0," + (-verticalStreight) + " ";
 		d += "a" + radius + "," + radius + " 0 0 0 " + (-radius) + "," + (-radius) + " ";
 		d += "z";
+		//Проходимся по все углам элемента чтобы при отрисовке path рисунок не обрезался
+		//Особенно заметно отсутствие этой строки при большом значении shadowBlurRadius
+		d += "M0,0 M" + svgWidth + ",0 M" + svgWidth + "," + svgHeight + " M0," + svgHeight + " ";
 
 		return d;
 	}
@@ -133,12 +157,10 @@ function Bubble(areaId){
 	//
 	//Радиус скругления углов границ
 	//
-	this.getBorderRadius = function(width, height, radius){
-		/*
-		width  - ширина тела пузыря (int)
-		height - высота тела пузыря (int)
-		radius - заданный радиус скругления границ
-		*/
+	this.getBorderRadius = function(){
+		var width  = _self.options.bodyWidth;
+		var height = _self.options.bodyHeight;
+		var radius = _self.options.borderRadius;
 
 		// Определяем длину меньшей из границ
 		var smallerBorder = (width < height) ? width : height;
@@ -153,11 +175,11 @@ function Bubble(areaId){
 	//
 	//Создаем html
 	//
-	this.createHTML = function(text, bubbleX, bubbleY){
+	this.createHTML = function(text, xBody, yBody){
 		/*
 		text           - текст (string)
-		bubbleX
-		bubbleY        - координаты для верхнего левого края текстового блока в пикселах, относительно areaId (number)
+		xBody
+		yBody        - координаты для верхнего левого края текстового блока в пикселах, относительно areaId (number)
 		*/
 
 		//создаем общий контейнер для всего пузыря
@@ -166,8 +188,8 @@ function Bubble(areaId){
 		bubbleContainer.style.position = "absolute";
 		bubbleContainer.style.display  = "inline-block";
 		bubbleContainer.style.maxWidth = _self.options.textMaxWidth + "px";
-		bubbleContainer.style.left     = bubbleX + "px";
-		bubbleContainer.style.top      = bubbleY + "px";
+		bubbleContainer.style.left     = xBody + "px";
+		bubbleContainer.style.top      = yBody + "px";
 
 		//создаем элемент для текста
 		var textContainer = document.createElement("span");
@@ -175,6 +197,12 @@ function Bubble(areaId){
 		textContainer.style.left       = _self.options.textPadding + "px";
 		textContainer.style.top        = _self.options.textPadding + "px";
 		
+		//стилизуем
+		textContainer.style.fontFamily = _self.options.fontFamily;
+		textContainer.style.fontSize   = _self.options.fontSize;
+		textContainer.style.color      = _self.options.fontColor;
+
+
 		// вставляем текст
 		textContainer.innerHTML = text;
 
@@ -185,8 +213,8 @@ function Bubble(areaId){
 		_self.areaId.insertAdjacentElement("beforeEnd",bubbleContainer);
 
 		//После вставки текстового блока в DOM определяем его фактические ширину и высоту
-		var textWidth  = parseInt(textContainer.offsetWidth);
-		var textHeight = parseInt(textContainer.offsetHeight);
+		var textWidth  = _self.optionAdd("textWidth", parseInt(textContainer.offsetWidth));
+		var textHeight = _self.optionAdd("textHeight", parseInt(textContainer.offsetHeight));
 
 		// Фиксируем ширину и высоту текстового контейнера
 		textContainer.style.width    = textWidth + "px";
@@ -201,11 +229,30 @@ function Bubble(areaId){
 		bubbleContainer.style.maxWidth = "";
 
 		//возвращаем созданный элемент-контейнер нашего пузыря
-		return {
-				bubbleContainer: bubbleContainer
-			,	textContainer: textContainer
-			}
+		return bubbleContainer;
 	}
+
+	//
+	//Добавляем свойство в объект options
+	//
+	this.optionAdd = function(name, value){
+		_self.options[name] = value;
+		return value;
+	}
+}
+
+//
+//Проверка свойства position элемента
+//Если position у переданного элемента равно "static", то возвращается первый родительский элемент с position != "static"
+//
+function getNotStaticElement(elem){
+	var position = getComputedStyle(elem).position;
+
+	while(position == "static" && elem.tagName != "BODY"){
+		elem = elem.parentNode;
+	}
+
+	return elem;
 }
 
 // Полифиллы insertAdjacent* для FireFox 
