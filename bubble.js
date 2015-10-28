@@ -70,7 +70,7 @@ function Bubble(areaId){
 		var bodyHeight = _self.optionAdd("bodyHeight", _self.options.textHeight + _self.options.textPadding * 2);
 
 		//отступ
-		var indent = _self.optionAdd("indent", _self.options.borderWidth + _self.options.shadowH + _self.options.shadowV + _self.options.shadowBlurRadius * 3);
+		var indent = _self.optionAdd("indent", _self.options.borderWidth + _self.getErValue("bigger", _self.options.shadowH, _self.options.shadowV) + _self.options.shadowBlurRadius * 3);
 
 		// Устанавливаем элементу svg атрибуты
 		svg.style.position = "absolute";
@@ -163,7 +163,7 @@ function Bubble(areaId){
 		var radius = _self.options.borderRadius;
 
 		// Определяем длину меньшей из границ
-		var smallerBorder = (width < height) ? width : height;
+		var smallerBorder = _self.getErValue("smaller", width, height);
 
 		// Вычисляем реальный радиус скругления углов
 		var realBorderRadius = Math.floor(((smallerBorder - radius * 2) > 0) ? radius : smallerBorder / 2);
