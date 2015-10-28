@@ -233,6 +233,26 @@ function Bubble(areaId){
 	}
 
 	//
+	//Получить большее или меньшее значение
+	//
+	this.getErValue = function(type, value1, value2){
+		/*
+		type   - какое значение вернуть - меньшее ("s[maller]") или большее ("b[igger]") (string)
+		value1, value2 - сравниваемые значения (number)
+		*/
+
+		type = type.substr(0, 1).toLowerCase();
+
+		if(type == "s"){
+			return value1 < value2 ? value1 : value2;
+		} else if(type == "b"){
+			return value1 > value2 ? value1 : value2;
+		} else{
+			return false;
+		}
+	}
+
+	//
 	//Добавляем свойство в объект options
 	//
 	this.optionAdd = function(name, value){
