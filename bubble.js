@@ -300,6 +300,8 @@ if (typeof HTMLElement != "undefined" && !HTMLElement.prototype.insertAdjacentEl
             break;
         }
     }
+
+    SVGElement.prototype.insertAdjacentElement = HTMLElement.prototype.insertAdjacentElement;
 }
 
 if (typeof HTMLElement != "undefined" && !HTMLElement.prototype.insertAdjacentHTML){
@@ -309,6 +311,8 @@ if (typeof HTMLElement != "undefined" && !HTMLElement.prototype.insertAdjacentHT
         var parsedHTML = r.createContextualFragment(htmlStr);
         this.insertAdjacentElement(where, parsedHTML);
     }
+
+    SVGElement.prototype.insertAdjacentHTML = HTMLElement.prototype.insertAdjacentHTML;
 }
 
 if (typeof HTMLElement != "undefined" && !HTMLElement.prototype.insertAdjacentText){
@@ -316,4 +320,6 @@ if (typeof HTMLElement != "undefined" && !HTMLElement.prototype.insertAdjacentTe
         var parsedText = document.createTextNode(txtStr);
         this.insertAdjacentElement(where, parsedText);
     }
+    
+    SVGElement.prototype.insertAdjacentText = HTMLElement.prototype.insertAdjacentText;
 }
