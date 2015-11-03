@@ -88,7 +88,16 @@ function Bubble(areaId){
 		var dBodyShadow = _self.getDForBody(svg, indent + _self.options.shadowH, indent + _self.options.shadowV);
 
 		// фильтр для тени
-		var filter ="<defs><filter id=\"shadow\"><feGaussianBlur stdDeviation=\"" + _self.options.shadowBlurRadius + "\"/></filter></defs>";
+		var defs = document.createElementNS("http://www.w3.org/2000/svg", 'defs');
+		
+		var filter = document.createElementNS("http://www.w3.org/2000/svg", 'filter');
+		filter.setAttribute("id", "shadow");
+
+		var feGaussianBlur = document.createElementNS("http://www.w3.org/2000/svg", 'feGaussianBlur');
+		feGaussianBlur.setAttribute("stdDeviation", _self.options.shadowBlurRadius);
+
+		filter.insertAdjacentElement("beforeEnd", feGaussianBlur);
+		defs.insertAdjacentElement("beforeEnd", filter);
 
 		// path для тени Body
 		var pathBodyShadow = document.createElementNS("http://www.w3.org/2000/svg", 'path');
@@ -108,7 +117,7 @@ function Bubble(areaId){
 		pathBodyFill.style.fill = _self.options.fill;
 
 		// вставляем в элемент svg
-		svg.insertAdjacentHTML("beforeEnd", filter);
+		svg.insertAdjacentElement("afterBegin", defs);
 		svg.insertAdjacentElement("beforeEnd", pathBodyShadow);
 		svg.insertAdjacentElement("beforeEnd", pathBodyBorder);
 		svg.insertAdjacentElement("beforeEnd", pathBodyFill);
@@ -300,9 +309,34 @@ if (typeof HTMLElement != "undefined" && !HTMLElement.prototype.insertAdjacentEl
             break;
         }
     }
-
-    SVGElement.prototype.insertAdjacentElement = HTMLElement.prototype.insertAdjacentElement;
 }
+
+if (typeof SVGElement != "undefined" && !SVGElement.prototype.insertAdjacentElement){
+    SVGElement.prototype.insertAdjacentElement = function(where, element) {
+        switch (where){
+            case 'beforeBegin':
+                this.parentNode.insertBefore(element, this);
+            break;
+
+            case 'afterBegin':
+                this.insertBefore(element, this.firstChild);
+            break;
+            
+            case 'beforeEnd':
+                this.appendChild(element);
+            break;
+      
+            case 'afterEnd':
+                if (this.nextSibling){
+                    this.parentNode.insertBefore(element, this.nextSibling);
+                } else {
+                    this.parentNode.appendChild(element);
+                }
+            break;
+        }
+    }
+}
+
 
 if (typeof HTMLElement != "undefined" && !HTMLElement.prototype.insertAdjacentHTML){
     HTMLElement.prototype.insertAdjacentHTML = function(where, htmlStr) {
@@ -311,8 +345,15 @@ if (typeof HTMLElement != "undefined" && !HTMLElement.prototype.insertAdjacentHT
         var parsedHTML = r.createContextualFragment(htmlStr);
         this.insertAdjacentElement(where, parsedHTML);
     }
+}
 
-    SVGElement.prototype.insertAdjacentHTML = HTMLElement.prototype.insertAdjacentHTML;
+if (typeof SVGElement != "undefined" && !SVGElement.prototype.insertAdjacentHTML){
+    SVGElement.prototype.insertAdjacentHTML = function(where, htmlStr) {
+        var r = this.ownerDocument.createRange();
+        r.setStartBefore(this);
+        var parsedHTML = r.createContextualFragment(htmlStr);
+        this.insertAdjacentElement(where, parsedHTML);
+    }
 }
 
 if (typeof HTMLElement != "undefined" && !HTMLElement.prototype.insertAdjacentText){
@@ -320,6 +361,11 @@ if (typeof HTMLElement != "undefined" && !HTMLElement.prototype.insertAdjacentTe
         var parsedText = document.createTextNode(txtStr);
         this.insertAdjacentElement(where, parsedText);
     }
-    
-    SVGElement.prototype.insertAdjacentText = HTMLElement.prototype.insertAdjacentText;
+}
+
+if (typeof SVGElement != "undefined" && !SVGElement.prototype.insertAdjacentText){
+    SVGElement.prototype.insertAdjacentText = function(where, txtStr) {
+        var parsedText = document.createTextNode(txtStr);
+        this.insertAdjacentElement(where, parsedText);
+    }
 }
