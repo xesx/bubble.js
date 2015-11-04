@@ -58,9 +58,8 @@ function Bubble(areaId){
 		_self.optionAdd("yTail", yTail);
 
 		var html = _self.createHTML(text, xBody, yBody);
-		var svg  = _self.createSVG(html);
 
-		// debugger
+		var svg  = _self.createSVG(html);
 
 	}
 
@@ -245,6 +244,8 @@ function Bubble(areaId){
 		textContainer.style.fontFamily = _self.options.fontFamily;
 		textContainer.style.fontSize   = _self.options.fontSize;
 		textContainer.style.color      = _self.options.fontColor;
+		textContainer.style.textAlign  = _self.options.textAlign;
+		textContainer.style.display    = "inline-block";
 
 		// вставляем текст
 		textContainer.innerHTML = text;
@@ -262,11 +263,7 @@ function Bubble(areaId){
 		// Фиксируем ширину и высоту текстового контейнера
 		textContainer.style.width    = textWidth + "px";
 		textContainer.style.height   = textHeight + "px";
-		textContainer.style.display  = "inline-block";
-		textContainer.style.position = "absolute";
-
-		//выравниваем текст
-		textContainer.style.textAlign = _self.options.textAlign;
+		textContainer.style.position = "absolute";		
 
 		//удаляем лишний атрибут у общего контейнера
 		bubbleContainer.style.maxWidth = "";
