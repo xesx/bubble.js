@@ -266,6 +266,19 @@ function Bubble(areaId){
 		_self.options[name] = value;
 		return value;
 	}
+
+	//
+	//Отладочный метод для добавления точки в sv-элемент
+	//
+	this.setPoint = function(svg, x, y){
+		var circle = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
+		circle.setAttribute("cx", x);
+		circle.setAttribute("cy", y);
+		circle.setAttribute("r", 2);
+		circle.style.fill = "green";
+
+		svg.insertAdjacentElement("beforeEnd", circle);
+	}
 }
 
 //
