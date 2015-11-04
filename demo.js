@@ -10,7 +10,7 @@ function content(){
     var bubble = new Bubble(cont);
 
     
-    var div = bubble.create("test test test test test test test test test test test test test test test test test test", 120, 120, 150, 500);
+    var div = bubble.create("test test test test test test test test test test test test test test test test test test", 120, 120, 500, 50);
     // var div = bubble.create("test test test test", 0, 0);
 
 

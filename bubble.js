@@ -99,8 +99,8 @@ function Bubble(areaId){
 		var yBodySVG = _self.optionAdd("yBodySVG", offsetY + indent);
 
 		//Координаты конца хвоста в svg-элементе
-		var xTailSVG = _self.optionAdd("xTailSVG", ((xTail > xBody) ? xTail : xTail - _self.options.xSVG) + indent);
-		var yTailSVG = _self.optionAdd("yTailSVG", ((yTail > yBody) ? yTail : yTail - _self.options.ySVG) + indent);
+		var xTailSVG = _self.optionAdd("xTailSVG", ((xTail - xBody)) + indent);
+		var yTailSVG = _self.optionAdd("yTailSVG", ((yTail - yBody)) + indent);
 
 		_self.setPoint(svg, xTailSVG, yTailSVG);
 
@@ -151,8 +151,9 @@ function Bubble(areaId){
 	//Получение размеров svg-элемента
 	//
 	this.getSVGSize = function(cBody, cTail, bodyLong){
+		debugger
 		if(cTail < cBody){
-			return cBody + bodyLong;
+			return cBody + bodyLong - cTail;
 		} else if(cTail <= (cBody + bodyLong)){
 			return bodyLong;
 		} else {
@@ -308,7 +309,7 @@ function Bubble(areaId){
 	}
 
 	//
-	//Отладочный метод для добавления точки в sv-элемент
+	//Отладочный метод для добавления точки в svg-элемент
 	//
 	this.setPoint = function(svg, x, y){
 		var circle = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
