@@ -16,10 +16,14 @@ function Bubble(areaId){
 	,	borderRadius         : 40              // радиус скругления углов границ
 	,	fill                 : "#FFFFFF"       // цвет заливки (color)
 	,	shadowColor          : "#000000"       // цвет тени (color)
-	,	shadowH              : 4               // смещение тени по горизонтали
-	,	shadowV              : 8               // смещение тени по вертикали
-	,	shadowBlurRadius     : 3               // радиус размытия тени (number)
+	,	shadowH              : 0               // смещение тени по горизонтали
+	,	shadowV              : 0               // смещение тени по вертикали
+	,	shadowBlurRadius     : 0               // радиус размытия тени (number)
+	
 	,	tailWidth            : 10              // ширина основания хвоста в пикселях (number)
+	,	tailP1               : {x: 0, y: 0}    // координаты первой опорной точки кривой Безье для отрисовки хвоста
+	,	tailP2               : {x: 0, y: 0}    // координаты второй опорной точки кривой Безье для отрисовки хвоста
+	                                           // координаты задаются как коэффициенты длины от начала кривой до ее конца по каждой из координат
 
 	}
 
@@ -56,34 +60,55 @@ function Bubble(areaId){
 		var html = _self.createHTML(text, xBody, yBody);
 		var svg  = _self.createSVG(html);
 
+		// debugger
+
 	}
 
 	//
 	//Создаем SVG
 	//
 	this.createSVG = function(html){
+		var xBody = _self.options.xBody;
+		var yBody = _self.options.yBody;
+		var xTail = _self.options.xTail;
+		var yTail = _self.options.yTail;
+
 		var svg = document.createElementNS("http://www.w3.org/2000/svg", 'svg');
 
 		var bodyWidth  = _self.optionAdd("bodyWidth", _self.options.textWidth + _self.options.textPadding * 2);
 		var bodyHeight = _self.optionAdd("bodyHeight", _self.options.textHeight + _self.options.textPadding * 2);
 
+		var offsetX = _self.optionAdd("offsetX", (xBody < xTail) ? 0 : Math.abs(xBody - xTail)); 
+		var offsetY = _self.optionAdd("offsetY", (yBody < yTail) ? 0 : Math.abs(yBody - yTail));
+
 		//отступ
-		var indent = _self.optionAdd("indent", _self.options.borderWidth + _self.getErValue("bigger", _self.options.shadowH, _self.options.shadowV) + _self.options.shadowBlurRadius * 3);
+		var indent = _self.optionAdd("indent", _self.options.borderWidth + _self.getErValue("bigger", [_self.options.shadowH, _self.options.shadowV]) + _self.options.shadowBlurRadius * 3);
 
 		// Устанавливаем элементу svg атрибуты
 		svg.style.position = "absolute";
-		svg.style.left     = -(indent) + "px";
-		svg.style.top      = -(indent) + "px";
-		svg.style.width    = bodyWidth + indent * 2 + "px";
-		svg.style.height   = bodyHeight + indent * 2 +"px";
+		svg.style.left     = _self.optionAdd("xSVG", -offsetX -(indent)) + "px";
+		svg.style.top      = _self.optionAdd("ySVG", -offsetY -(indent)) + "px";
+		
+		svg.style.width    = _self.optionAdd("SVGWidth", _self.getSVGSize(xBody, xTail, bodyWidth) + indent * 2) + "px";
+		svg.style.height   = _self.optionAdd("SVGHeight", _self.getSVGSize(yBody, yTail, bodyHeight) + indent * 2) + "px";
 
 		//Вычисляем реальный радиус скругления границ
 		var realRadius = _self.optionAdd("realRadius", _self.getBorderRadius());
 
-		// атрибут d для Body
-		var dBody = _self.getDForBody(svg, indent, indent);
+		//Координаты верхнего левого угла тела пузыря в svg-элементе
+		var xBodySVG = _self.optionAdd("xBodySVG", offsetX + indent);
+		var yBodySVG = _self.optionAdd("yBodySVG", offsetY + indent);
 
-		var dBodyShadow = _self.getDForBody(svg, indent + _self.options.shadowH, indent + _self.options.shadowV);
+		//Координаты конца хвоста в svg-элементе
+		var xTailSVG = _self.optionAdd("xTailSVG", ((xTail > xBody) ? xTail : xTail - _self.options.xSVG) + indent);
+		var yTailSVG = _self.optionAdd("yTailSVG", ((yTail > yBody) ? yTail : yTail - _self.options.ySVG) + indent);
+
+		_self.setPoint(svg, xTailSVG, yTailSVG);
+
+		// атрибут d для Body
+		var dBody = _self.getDForBody(svg, xBodySVG, yBodySVG);
+
+		var dBodyShadow = _self.getDForBody(svg, xBodySVG + _self.options.shadowH, yBodySVG + _self.options.shadowV);
 
 		// фильтр для тени
 		var defs = document.createElementNS("http://www.w3.org/2000/svg", 'defs');
@@ -124,6 +149,19 @@ function Bubble(areaId){
 	}
 
 	//
+	//Получение размеров svg-элемента
+	//
+	this.getSVGSize = function(cBody, cTail, bodyLong){
+		if(cTail < cBody){
+			return cBody + bodyLong;
+		} else if(cTail <= (cBody + bodyLong)){
+			return bodyLong;
+		} else {
+			return cTail - cBody;
+		}
+	}
+
+	//
 	//Формирование атрибута d для тела пузыря
 	//
 	this.getDForBody = function(svg, xStart, yStart){
@@ -142,10 +180,9 @@ function Bubble(areaId){
 		//длина прямых частей границ
 		var horisontalStreight = (bodyWidth - radius * 2);
 		var verticalStreight   = (bodyHeight - radius * 2);
-		
+
 		var d   = "";
 		
-
 		d += "M" + (xStart + radius) + "," + yStart + " a" + radius + "," + radius + " 0 0 0 " + (-radius) + "," + radius + " ";
 		d += "v" + "0," + verticalStreight + " ";
 		d += "a" + radius + "," + radius + " 0 0 0 " + radius + "," + radius + " ";
@@ -170,7 +207,7 @@ function Bubble(areaId){
 		var radius = _self.options.borderRadius;
 
 		// Определяем длину меньшей из границ
-		var smallerBorder = _self.getErValue("smaller", width, height);
+		var smallerBorder = _self.getErValue("smaller", [width, height]);
 
 		// Вычисляем реальный радиус скругления углов
 		var realBorderRadius = Math.floor(((smallerBorder - radius * 2) > 0) ? radius : smallerBorder / 2);
@@ -209,7 +246,6 @@ function Bubble(areaId){
 		textContainer.style.fontSize   = _self.options.fontSize;
 		textContainer.style.color      = _self.options.fontColor;
 
-
 		// вставляем текст
 		textContainer.innerHTML = text;
 
@@ -242,18 +278,25 @@ function Bubble(areaId){
 	//
 	//Получить большее или меньшее значение
 	//
-	this.getErValue = function(type, value1, value2){
+	this.getErValue = function(type, array){
 		/*
 		type   - какое значение вернуть - меньшее ("s[maller]") или большее ("b[igger]") (string)
-		value1, value2 - сравниваемые значения (number)
+		array  - массив значений для сравнения (array)
 		*/
 
 		type = type.substr(0, 1).toLowerCase();
 
+		if (!Array.isArray(array)) return false;
+
+		array.sort(function(a, b){
+								  if (a > b) return 1;
+								  if (a < b) return -1;
+								  });
+
 		if(type == "s"){
-			return value1 < value2 ? value1 : value2;
+			return array[0];
 		} else if(type == "b"){
-			return value1 > value2 ? value1 : value2;
+			return array[array.length - 1];
 		} else{
 			return false;
 		}
