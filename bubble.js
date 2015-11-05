@@ -104,8 +104,20 @@ function Bubble(areaId){
 
 		_self.setPoint(svg, xTailSVG, yTailSVG);
 
+
+		var tailAngle = _self.getTailAngle();
+		
+		alert(tailAngle);
+
+		// временный элемент path который описывает тело пузыря
+		var pathBody = document.createElementNS("http://www.w3.org/2000/svg", 'path');
 		// атрибут d для Body
 		var dBody = _self.getDForBody(svg, xBodySVG, yBodySVG);
+		pathBody.setAttribute("d", dBody);
+
+		//длина периметра тела пузыря
+		var bodyPrimeterLength = _self.optionAdd("bodyPrimeterLength", pathBody.getTotalLength());
+
 
 		var dBodyShadow = _self.getDForBody(svg, xBodySVG + _self.options.shadowH, yBodySVG + _self.options.shadowV);
 
@@ -145,6 +157,31 @@ function Bubble(areaId){
 		svg.insertAdjacentElement("beforeEnd", pathBodyFill);
 
 		html.insertAdjacentElement("afterBegin", svg);
+	}
+
+	//
+	//Метод получения угла между центральной осью ординат и прямой проведенной из центра тела пузыря к точке окончания хвоста
+	//
+	this.getTailAngle = function(){
+		//координаты центра тела пузыря
+		var x1 = _self.options.xBodySVG + _self.options.bodyWidth/2;
+		var y1 = _self.options.yBodySVG + _self.options.bodyHeight/2;
+		//координаты окончания хвоста
+		var x2 = _self.options.xTailSVG;
+		var y2 = _self.options.yTailSVG;
+
+		var angle = Math.atan((y2-y1)/(x2-x1)) * 180 / Math.PI;
+
+		if (x1 < x2 && y1 > y2){
+			return Math.abs(angle);
+		} else if (x1 < x2 && y1 < y2){
+			return Math.abs(angle) + 90;
+		} else if (x1 > x2 && y1 < y2){
+			return Math.abs(angle) + 180;
+		} else if (x1 > x2 && y1 > y2){
+			return Math.abs(angle) + 270;
+		}
+
 	}
 
 	//
