@@ -16,13 +16,15 @@ function Bubble(areaId){
 	,	borderRadius         : 40              // радиус скругления углов границ
 	,	fill                 : "#FFFFFF"       // цвет заливки (color)
 	,	shadowColor          : "#000000"       // цвет тени (color)
-	,	shadowH              : 0               // смещение тени по горизонтали
-	,	shadowV              : 0               // смещение тени по вертикали
+	,	shadowH              : 0               // смещение тени по горизонтали (number)
+	,	shadowV              : 0               // смещение тени по вертикали (number)
 	,	shadowBlurRadius     : 0               // радиус размытия тени (number)
 	
 	,	tailWidth            : 10              // ширина основания хвоста в пикселях (number)
-	,	tailP1               : {x: 0, y: 0}    // координаты первой опорной точки кривой Безье для отрисовки хвоста
-	,	tailP2               : {x: 0, y: 0}    // координаты второй опорной точки кривой Безье для отрисовки хвоста
+	,	tailBaseAngle        : undefined       // параметр задает угол исходя из которого будет рассчитана точка основания хвоста на периметре тела (number)
+	                                           // по умолчанию точка лежит на персечении прямой от конца хвоста до центра тела и периметра тела
+	,	tailP1               : {x: 0, y: 0}    // координаты первой опорной точки кривой Безье для отрисовки хвоста (object)
+	,	tailP2               : {x: 0, y: 0}    // координаты второй опорной точки кривой Безье для отрисовки хвоста (object)
 	                                           // координаты задаются как коэффициенты длины от начала кривой до ее конца по каждой из координат
 
 	}
@@ -116,9 +118,16 @@ function Bubble(areaId){
 		//угол
 		var tailAngle = _self.getTailAngle();
 
-		var p = pathBody.getPointAtLength(tailAngle/360 * pathBody.getTotalLength())
+		// debugger
+		//точка на периметре, из которой будет расти хвост
+		if(_self.options.tailBaseAngle === undefined){
+			var pointTailBase = pathBody.getPointAtLength(tailAngle/360 * pathBody.getTotalLength());
+		} else{
+			_self.options.tailBaseAngle = _self.options.tailBaseAngle % 360;
+			var pointTailBase = pathBody.getPointAtLength(_self.options.tailBaseAngle/360 * pathBody.getTotalLength());
+		}
 
-		_self.setPoint(svg, p.x, p.y);
+		_self.setPoint(svg, pointTailBase.x, pointTailBase.y);
 
 		// debugger
 
