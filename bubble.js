@@ -99,8 +99,9 @@ function Bubble(areaId){
 		var yBodySVG = _self.optionAdd("yBodySVG", offsetY + indent);
 
 		//Координаты конца хвоста в svg-элементе
-		var xTailSVG = _self.optionAdd("xTailSVG", ((xTail - xBody)) + indent);
-		var yTailSVG = _self.optionAdd("yTailSVG", ((yTail - yBody)) + indent);
+		var xTailSVG = _self.optionAdd("xTailSVG", (xTail - xBody - _self.options.xSVG));
+		var yTailSVG = _self.optionAdd("yTailSVG", (yTail - yBody - _self.options.ySVG));
+		// debugger
 
 		_self.setPoint(svg, xTailSVG, yTailSVG);
 
@@ -151,7 +152,6 @@ function Bubble(areaId){
 	//Получение размеров svg-элемента
 	//
 	this.getSVGSize = function(cBody, cTail, bodyLong){
-		debugger
 		if(cTail < cBody){
 			return cBody + bodyLong - cTail;
 		} else if(cTail <= (cBody + bodyLong)){
