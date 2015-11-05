@@ -104,11 +104,7 @@ function Bubble(areaId){
 
 		_self.setPoint(svg, xTailSVG, yTailSVG);
 
-
-		var tailAngle = _self.getTailAngle();
 		
-		alert(tailAngle);
-
 		// временный элемент path который описывает тело пузыря
 		var pathBody = document.createElementNS("http://www.w3.org/2000/svg", 'path');
 		// атрибут d для Body
@@ -117,6 +113,14 @@ function Bubble(areaId){
 
 		//длина периметра тела пузыря
 		var bodyPrimeterLength = _self.optionAdd("bodyPrimeterLength", pathBody.getTotalLength());
+		//угол
+		var tailAngle = _self.getTailAngle();
+
+		var p = pathBody.getPointAtLength(tailAngle/360 * pathBody.getTotalLength())
+
+		_self.setPoint(svg, p.x, p.y);
+
+		// debugger
 
 
 		var dBodyShadow = _self.getDForBody(svg, xBodySVG + _self.options.shadowH, yBodySVG + _self.options.shadowV);
@@ -216,17 +220,18 @@ function Bubble(areaId){
 		var verticalStreight   = (bodyHeight - radius * 2);
 
 		var d   = "";
-		
+
 		d += "M" + (xStart + bodyWidth/2) + "," + yStart + " ";
-		d += "h" + (-horisontalStreight/2) + ",0" + " ";
-		d += " a" + radius + "," + radius + " 0 0 0 " + (-radius) + "," + radius + " ";
+		d += "h" + horisontalStreight/2 + ",0" + " ";
+		d += " a" + radius + "," + radius + " 0 0 1 " + radius + "," + radius + " ";
 		d += "v" + "0," + verticalStreight + " ";
-		d += "a" + radius + "," + radius + " 0 0 0 " + radius + "," + radius + " ";
-		d += "h" + horisontalStreight + ",0" + " ";
-		d += "a" + radius + "," + radius + " 0 0 0 " + radius + "," + (-radius) + " ";
+		d += "a" + radius + "," + radius + " 0 0 1 " + (-radius) + "," + radius + " ";
+		d += "h" + (-horisontalStreight) + ",0" + " ";
+		d += "a" + radius + "," + radius + " 0 0 1 " + (-radius) + "," + (-radius) + " ";
 		d += "v" + "0," + (-verticalStreight) + " ";
-		d += "a" + radius + "," + radius + " 0 0 0 " + (-radius) + "," + (-radius) + " ";
+		d += "a" + radius + "," + radius + " 0 0 1 " + radius + "," + (-radius) + " ";
 		d += "z";
+
 		//Проходимся по все углам элемента чтобы при отрисовке path рисунок не обрезался
 		//Особенно заметно отсутствие этой строки при большом значении shadowBlurRadius
 		d += "M0,0 M" + svgWidth + ",0 M" + svgWidth + "," + svgHeight + " M0," + svgHeight + " ";
