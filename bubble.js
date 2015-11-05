@@ -20,7 +20,7 @@ function Bubble(areaId){
 	,	shadowV              : 0               // смещение тени по вертикали (number)
 	,	shadowBlurRadius     : 0               // радиус размытия тени (number)
 	
-	,	tailWidth            : 10              // ширина основания хвоста в пикселях (number)
+	,	tailWidth            : 50              // ширина основания хвоста в пикселях (number)
 	,	tailBaseAngle        : undefined       // параметр задает угол исходя из которого будет рассчитана точка основания хвоста на периметре тела (number)
 	                                           // по умолчанию точка лежит на персечении прямой от конца хвоста до центра тела и периметра тела
 	,	tailP1               : {x: 0, y: 0}    // координаты первой опорной точки кривой Безье для отрисовки хвоста (object)
@@ -168,14 +168,34 @@ function Bubble(areaId){
 			angle = (angle > 0) ? angle : angle + 360;
 		}
 
+		//расстояние от начала path до центра основания хвоста
+		var centerTailBaseDistance = angle/360 * bodyPrimeterLength;
+
 		//точка - центр основания хвоста
-		var pointTailBase = pathBody.getPointAtLength(angle/360 * pathBody.getTotalLength());
+		var centerTailBase = pathBody.getPointAtLength(centerTailBaseDistance);
 
-		_self.setPoint(_self.options.SVGElement, pointTailBase.x, pointTailBase.y);
+		_self.setPoint(_self.options.SVGElement, centerTailBase.x, centerTailBase.y);
 
-		
 
-		// debugger
+		//ширина основания хвоста (не должна быть больше половины длины периметра)
+		var tailWidth = (_self.options.tailWidth > bodyPrimeterLength/2) ? bodyPrimeterLength/2 : _self.options.tailWidth;
+
+		//расстояние о начала path до точек основания хвоста
+		var tailBaseP1Distance = centerTailBaseDistance - tailWidth/2;
+		var tailBaseP2Distance = centerTailBaseDistance + tailWidth/2;
+
+		tailBaseP1Distance = (tailBaseP1Distance > 0) ? tailBaseP1Distance : tailBaseP1Distance + bodyPrimeterLength;
+		tailBaseP2Distance = (tailBaseP2Distance < bodyPrimeterLength) ? tailBaseP2Distance : tailBaseP2Distance - bodyPrimeterLength;
+
+		//точки основания хвоста
+		var tailBaseP1 = _self.optionAdd("tailBaseP1", pathBody.getPointAtLength(tailBaseP1Distance));
+		var tailBaseP2 = _self.optionAdd("tailBaseP2", pathBody.getPointAtLength(tailBaseP2Distance));
+
+		_self.setPoint(_self.options.SVGElement, tailBaseP1.x, tailBaseP1.y, "yellow");
+		_self.setPoint(_self.options.SVGElement, tailBaseP2.x, tailBaseP2.y, "red");
+
+		debugger
+
 	}
 
 	//
@@ -230,14 +250,14 @@ function Bubble(areaId){
  		var svgHeight  = _self.options.SVGHeight
 
 		//длина прямых частей границ
-		var horisontalStreight = (bodyWidth - radius * 2);
-		var verticalStreight   = (bodyHeight - radius * 2);
+		var horisontalStreight = _self.optionAdd("horisontalStreight", (bodyWidth - radius * 2));
+		var verticalStreight   = _self.optionAdd("verticalStreight", (bodyHeight - radius * 2));
 
 		var d   = "";
 
 		d += "M" + (xStart + bodyWidth/2) + "," + yStart + " ";
 		d += "h" + horisontalStreight/2 + ",0" + " ";
-		d += " a" + radius + "," + radius + " 0 0 1 " + radius + "," + radius + " ";
+		d += "a" + radius + "," + radius + " 0 0 1 " + radius + "," + radius + " ";
 		d += "v" + "0," + verticalStreight + " ";
 		d += "a" + radius + "," + radius + " 0 0 1 " + (-radius) + "," + radius + " ";
 		d += "h" + (-horisontalStreight) + ",0" + " ";
@@ -248,7 +268,7 @@ function Bubble(areaId){
 
 		//Проходимся по все углам элемента чтобы при отрисовке path рисунок не обрезался
 		//Особенно заметно отсутствие этой строки при большом значении shadowBlurRadius
-		d += "M0,0 M" + svgWidth + ",0 M" + svgWidth + "," + svgHeight + " M0," + svgHeight + " ";
+		// d += "M0,0 M" + svgWidth + ",0 M" + svgWidth + "," + svgHeight + " M0," + svgHeight + " ";
 
 		return d;
 	}
@@ -366,12 +386,15 @@ function Bubble(areaId){
 	//
 	//Отладочный метод для добавления точки в svg-элемент
 	//
-	this.setPoint = function(svg, x, y){
+	this.setPoint = function(svg, x, y, color){
 		var circle = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
 		circle.setAttribute("cx", x);
 		circle.setAttribute("cy", y);
 		circle.setAttribute("r", 2);
-		circle.style.fill = "green";
+
+		color = (color === undefined) ? "green" : color;
+
+		circle.style.fill = color;
 
 		svg.insertAdjacentElement("beforeEnd", circle);
 	}
