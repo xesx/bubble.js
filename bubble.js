@@ -74,7 +74,7 @@ function Bubble(areaId){
 		var xTail = _self.options.xTail;
 		var yTail = _self.options.yTail;
 
-		var svg = document.createElementNS("http://www.w3.org/2000/svg", 'svg');
+		var svg = _self.optionAdd("SVGElement", document.createElementNS("http://www.w3.org/2000/svg", 'svg'));
 
 		var bodyWidth  = _self.optionAdd("bodyWidth", _self.options.textWidth + _self.options.textPadding * 2);
 		var bodyHeight = _self.optionAdd("bodyHeight", _self.options.textHeight + _self.options.textPadding * 2);
@@ -106,33 +106,11 @@ function Bubble(areaId){
 
 		_self.setPoint(svg, xTailSVG, yTailSVG);
 
-		
-		// временный элемент path который описывает тело пузыря
-		var pathBody = document.createElementNS("http://www.w3.org/2000/svg", 'path');
-		// атрибут d для Body
-		var dBody = _self.getDForBody(svg, xBodySVG, yBodySVG);
-		pathBody.setAttribute("d", dBody);
+		//Расчитываем координаты основания хвоста
+		_self.getTailBasePoints();
 
-		//длина периметра тела пузыря
-		var bodyPrimeterLength = _self.optionAdd("bodyPrimeterLength", pathBody.getTotalLength());
-		//угол
-		var tailAngle = _self.getTailAngle();
-
-		// debugger
-		//точка на периметре, из которой будет расти хвост
-		if(_self.options.tailBaseAngle === undefined){
-			var pointTailBase = pathBody.getPointAtLength(tailAngle/360 * pathBody.getTotalLength());
-		} else{
-			_self.options.tailBaseAngle = _self.options.tailBaseAngle % 360;
-			var pointTailBase = pathBody.getPointAtLength(_self.options.tailBaseAngle/360 * pathBody.getTotalLength());
-		}
-
-		_self.setPoint(svg, pointTailBase.x, pointTailBase.y);
-
-		// debugger
-
-
-		var dBodyShadow = _self.getDForBody(svg, xBodySVG + _self.options.shadowH, yBodySVG + _self.options.shadowV);
+		var dBodyMain   = _self.getDForBody(xBodySVG, yBodySVG);
+		var dBodyShadow = _self.getDForBody(xBodySVG + _self.options.shadowH, yBodySVG + _self.options.shadowV);
 
 		// фильтр для тени
 		var defs = document.createElementNS("http://www.w3.org/2000/svg", 'defs');
@@ -154,7 +132,7 @@ function Bubble(areaId){
 
 		// path для фона Body
 		var pathBodyFill = document.createElementNS("http://www.w3.org/2000/svg", 'path');
-		pathBodyFill.setAttribute("d", dBody);
+		pathBodyFill.setAttribute("d", dBodyMain);
 		pathBodyFill.style.fill = _self.options.fill;
 		pathBodyFill.style.stroke      = _self.options.borderColor;
 		pathBodyFill.style.strokeWidth = _self.options.borderWidth;
@@ -165,6 +143,39 @@ function Bubble(areaId){
 		svg.insertAdjacentElement("beforeEnd", pathBodyFill);
 
 		html.insertAdjacentElement("afterBegin", svg);
+	}
+	
+	//
+	//Определение точек основания хвоста
+	//
+	this.getTailBasePoints = function(){
+		// временный элемент path который описывает тело пузыря
+		var pathBody = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+		// атрибут d для Body
+		var dBody = _self.getDForBody(_self.options.xBodySVG, _self.options.yBodySVG);
+		pathBody.setAttribute("d", dBody);
+
+		//длина периметра тела пузыря
+		var bodyPrimeterLength = _self.optionAdd("bodyPrimeterLength", pathBody.getTotalLength());
+
+		//угол
+		var angle = _self.options.tailBaseAngle;
+
+		if (angle === undefined){ // если не задан, то определяем по умолчанию
+			angle = _self.getTailAngle();
+		} else{
+			angle = _self.options.tailBaseAngle % 360;
+			angle = (angle > 0) ? angle : angle + 360;
+		}
+
+		//точка - центр основания хвоста
+		var pointTailBase = pathBody.getPointAtLength(angle/360 * pathBody.getTotalLength());
+
+		_self.setPoint(_self.options.SVGElement, pointTailBase.x, pointTailBase.y);
+
+		
+
+		// debugger
 	}
 
 	//
@@ -208,9 +219,8 @@ function Bubble(areaId){
 	//
 	//Формирование атрибута d для тела пузыря
 	//
-	this.getDForBody = function(svg, xStart, yStart){
+	this.getDForBody = function(xStart, yStart){
 		/*
-		svg            - svg-элемент для которого создается path
 		xStart, yStart - координаты левого верхнего угла (без учета borderRadius) в рамках svg-элемента
 		*/
 		var bodyWidth  = _self.options.bodyWidth;
