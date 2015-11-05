@@ -152,21 +152,16 @@ function Bubble(areaId){
 		pathBodyShadow.setAttribute("filter", "url(#shadow)");
 		pathBodyShadow.style.fill = _self.options.shadowColor;
 
-		// path для контура Body
-		var pathBodyBorder = document.createElementNS("http://www.w3.org/2000/svg", 'path');
-		pathBodyBorder.setAttribute("d", dBody);
-		pathBodyBorder.style.stroke      = _self.options.borderColor;
-		pathBodyBorder.style.strokeWidth = _self.options.borderWidth;
-
 		// path для фона Body
 		var pathBodyFill = document.createElementNS("http://www.w3.org/2000/svg", 'path');
 		pathBodyFill.setAttribute("d", dBody);
 		pathBodyFill.style.fill = _self.options.fill;
+		pathBodyFill.style.stroke      = _self.options.borderColor;
+		pathBodyFill.style.strokeWidth = _self.options.borderWidth;
 
 		// вставляем в элемент svg
 		svg.insertAdjacentElement("afterBegin", defs);
 		svg.insertAdjacentElement("beforeEnd", pathBodyShadow);
-		svg.insertAdjacentElement("beforeEnd", pathBodyBorder);
 		svg.insertAdjacentElement("beforeEnd", pathBodyFill);
 
 		html.insertAdjacentElement("afterBegin", svg);
