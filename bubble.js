@@ -104,13 +104,24 @@ function Bubble(areaId){
 		var xTailSVG = _self.optionAdd("xTailSVG", (xTail - xBody - _self.options.xSVG));
 		var yTailSVG = _self.optionAdd("yTailSVG", (yTail - yBody - _self.options.ySVG));
 
-		_self.setPoint(svg, xTailSVG, yTailSVG);
-
+		_self.setPoint(svg, xTailSVG, yTailSVG);		
+		
+		// временный элемент path который описывает тело пузыря
+		var pathBody = _self.optionAdd("pathBody", _self.getPathForBody(_self.options.xBodySVG, _self.options.yBodySVG));
+		
 		//Расчитываем координаты основания хвоста
 		_self.getTailBasePoints();
 
-		var dBodyMain   = _self.getDForBody(xBodySVG, yBodySVG);
-		var dBodyShadow = _self.getDForBody(xBodySVG + _self.options.shadowH, yBodySVG + _self.options.shadowV);
+		//сегменты в которых находятся точки основания
+		var tailBaseP1Seg = pathBody.getPathSegAtLength(_self.options.tailBaseP1Distance);
+		var tailBaseP2Seg = pathBody.getPathSegAtLength(_self.options.tailBaseP2Distance);
+
+
+
+
+
+		var pathBodyMain   = _self.getPathForBody(xBodySVG, yBodySVG);
+		// var dBodyShadow = _self.getPathForBody(xBodySVG + _self.options.shadowH, yBodySVG + _self.options.shadowV);
 
 		// фильтр для тени
 		var defs = document.createElementNS("http://www.w3.org/2000/svg", 'defs');
@@ -125,22 +136,22 @@ function Bubble(areaId){
 		defs.insertAdjacentElement("beforeEnd", filter);
 
 		// path для тени Body
-		var pathBodyShadow = document.createElementNS("http://www.w3.org/2000/svg", 'path');
-		pathBodyShadow.setAttribute("d", dBodyShadow);
-		pathBodyShadow.setAttribute("filter", "url(#shadow)");
-		pathBodyShadow.style.fill = _self.options.shadowColor;
+		// var pathBodyShadow = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+		// pathBodyShadow.setAttribute("d", dBodyShadow);
+		// pathBodyShadow.setAttribute("filter", "url(#shadow)");
+		// pathBodyShadow.style.fill = _self.options.shadowColor;
 
 		// path для фона Body
-		var pathBodyFill = document.createElementNS("http://www.w3.org/2000/svg", 'path');
-		pathBodyFill.setAttribute("d", dBodyMain);
-		pathBodyFill.style.fill = _self.options.fill;
-		pathBodyFill.style.stroke      = _self.options.borderColor;
-		pathBodyFill.style.strokeWidth = _self.options.borderWidth;
+		// var pathBodyFill = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+		// pathBodyFill.setAttribute("d", dBodyMain);
+		pathBodyMain.style.fill = _self.options.fill;
+		pathBodyMain.style.stroke      = _self.options.borderColor;
+		pathBodyMain.style.strokeWidth = _self.options.borderWidth;
 
 		// вставляем в элемент svg
-		svg.insertAdjacentElement("afterBegin", defs);
-		svg.insertAdjacentElement("beforeEnd", pathBodyShadow);
-		svg.insertAdjacentElement("beforeEnd", pathBodyFill);
+		// svg.insertAdjacentElement("afterBegin", defs);
+		// svg.insertAdjacentElement("beforeEnd", pathBodyShadow);
+		svg.insertAdjacentElement("beforeEnd", pathBodyMain);
 
 		html.insertAdjacentElement("afterBegin", svg);
 	}
@@ -150,10 +161,7 @@ function Bubble(areaId){
 	//
 	this.getTailBasePoints = function(){
 		// временный элемент path который описывает тело пузыря
-		var pathBody = document.createElementNS("http://www.w3.org/2000/svg", 'path');
-		// атрибут d для Body
-		var dBody = _self.getDForBody(_self.options.xBodySVG, _self.options.yBodySVG);
-		pathBody.setAttribute("d", dBody);
+		var pathBody = _self.options.pathBody;
 
 		//длина периметра тела пузыря
 		var bodyPrimeterLength = _self.optionAdd("bodyPrimeterLength", pathBody.getTotalLength());
@@ -187,15 +195,15 @@ function Bubble(areaId){
 		tailBaseP1Distance = (tailBaseP1Distance > 0) ? tailBaseP1Distance : tailBaseP1Distance + bodyPrimeterLength;
 		tailBaseP2Distance = (tailBaseP2Distance < bodyPrimeterLength) ? tailBaseP2Distance : tailBaseP2Distance - bodyPrimeterLength;
 
+		_self.optionAdd("tailBaseP1Distance", tailBaseP1Distance);
+		_self.optionAdd("tailBaseP2Distance", tailBaseP2Distance);
+
 		//точки основания хвоста
 		var tailBaseP1 = _self.optionAdd("tailBaseP1", pathBody.getPointAtLength(tailBaseP1Distance));
 		var tailBaseP2 = _self.optionAdd("tailBaseP2", pathBody.getPointAtLength(tailBaseP2Distance));
 
 		_self.setPoint(_self.options.SVGElement, tailBaseP1.x, tailBaseP1.y, "yellow");
 		_self.setPoint(_self.options.SVGElement, tailBaseP2.x, tailBaseP2.y, "red");
-
-		debugger
-
 	}
 
 	//
@@ -239,13 +247,16 @@ function Bubble(areaId){
 	//
 	//Формирование атрибута d для тела пузыря
 	//
-	this.getDForBody = function(xStart, yStart){
+	this.getPathForBody = function(xStart, yStart){
 		/*
 		xStart, yStart - координаты левого верхнего угла (без учета borderRadius) в рамках svg-элемента
 		*/
+		var path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+
 		var bodyWidth  = _self.options.bodyWidth;
  		var bodyHeight = _self.options.bodyHeight;
  		var radius     = _self.options.realRadius;
+
  		var svgWidth   = _self.options.SVGWidth
  		var svgHeight  = _self.options.SVGHeight
 
@@ -253,24 +264,48 @@ function Bubble(areaId){
 		var horisontalStreight = _self.optionAdd("horisontalStreight", (bodyWidth - radius * 2));
 		var verticalStreight   = _self.optionAdd("verticalStreight", (bodyHeight - radius * 2));
 
-		var d   = "";
+		var segList = path.pathSegList;
 
-		d += "M" + (xStart + bodyWidth/2) + "," + yStart + " ";
-		d += "h" + horisontalStreight/2 + ",0" + " ";
-		d += "a" + radius + "," + radius + " 0 0 1 " + radius + "," + radius + " ";
-		d += "v" + "0," + verticalStreight + " ";
-		d += "a" + radius + "," + radius + " 0 0 1 " + (-radius) + "," + radius + " ";
-		d += "h" + (-horisontalStreight) + ",0" + " ";
-		d += "a" + radius + "," + radius + " 0 0 1 " + (-radius) + "," + (-radius) + " ";
-		d += "v" + "0," + (-verticalStreight) + " ";
-		d += "a" + radius + "," + radius + " 0 0 1 " + radius + "," + (-radius) + " ";
-		d += "z";
+		var segLenghts = [];
+
+		segList.appendItem(path.createSVGPathSegMovetoAbs((xStart + bodyWidth/2), yStart));
+		segLenghts.push(path.getTotalLength());
+
+		segList.appendItem(path.createSVGPathSegLinetoHorizontalRel(horisontalStreight/2));
+		segLenghts.push(path.getTotalLength());
+		
+		segList.appendItem(path.createSVGPathSegArcRel(radius, radius, radius, radius, 90, 0, 1));
+		segLenghts.push(path.getTotalLength());
+
+		segList.appendItem(path.createSVGPathSegLinetoVerticalRel(verticalStreight));
+		segLenghts.push(path.getTotalLength());
+
+		segList.appendItem(path.createSVGPathSegArcRel(-radius, radius, radius, radius, 90, 0, 1));
+		segLenghts.push(path.getTotalLength());
+
+		segList.appendItem(path.createSVGPathSegLinetoHorizontalRel(-horisontalStreight));
+		segLenghts.push(path.getTotalLength());
+
+		segList.appendItem(path.createSVGPathSegArcRel(-radius, -radius, radius, radius, 90, 0, 1));
+		segLenghts.push(path.getTotalLength());
+
+		segList.appendItem(path.createSVGPathSegLinetoVerticalRel(-verticalStreight));
+		segLenghts.push(path.getTotalLength());
+
+		segList.appendItem(path.createSVGPathSegArcRel(radius, -radius, radius, radius, 90, 0, 1));
+		segLenghts.push(path.getTotalLength());
+
+		segList.appendItem(path.createSVGPathSegClosePath());
+		segLenghts.push(path.getTotalLength());
+
+		_self.optionAdd("segLenghts", segLenghts);
+
 
 		//Проходимся по все углам элемента чтобы при отрисовке path рисунок не обрезался
 		//Особенно заметно отсутствие этой строки при большом значении shadowBlurRadius
 		// d += "M0,0 M" + svgWidth + ",0 M" + svgWidth + "," + svgHeight + " M0," + svgHeight + " ";
 
-		return d;
+		return path;
 	}
 
 	//
