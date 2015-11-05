@@ -101,7 +101,6 @@ function Bubble(areaId){
 		//Координаты конца хвоста в svg-элементе
 		var xTailSVG = _self.optionAdd("xTailSVG", (xTail - xBody - _self.options.xSVG));
 		var yTailSVG = _self.optionAdd("yTailSVG", (yTail - yBody - _self.options.ySVG));
-		// debugger
 
 		_self.setPoint(svg, xTailSVG, yTailSVG);
 
@@ -172,10 +171,8 @@ function Bubble(areaId){
 		var bodyWidth  = _self.options.bodyWidth;
  		var bodyHeight = _self.options.bodyHeight;
  		var radius     = _self.options.realRadius;
-
-		// Ширина и высота svg-элемента
-		var svgWidth  = parseInt(svg.style.width);
-		var svgHeight = parseInt(svg.style.height);
+ 		var svgWidth   = _self.options.SVGWidth
+ 		var svgHeight  = _self.options.SVGHeight
 
 		//длина прямых частей границ
 		var horisontalStreight = (bodyWidth - radius * 2);
@@ -183,7 +180,9 @@ function Bubble(areaId){
 
 		var d   = "";
 		
-		d += "M" + (xStart + radius) + "," + yStart + " a" + radius + "," + radius + " 0 0 0 " + (-radius) + "," + radius + " ";
+		d += "M" + (xStart + bodyWidth/2) + "," + yStart + " ";
+		d += "h" + (-horisontalStreight/2) + ",0" + " ";
+		d += " a" + radius + "," + radius + " 0 0 0 " + (-radius) + "," + radius + " ";
 		d += "v" + "0," + verticalStreight + " ";
 		d += "a" + radius + "," + radius + " 0 0 0 " + radius + "," + radius + " ";
 		d += "h" + horisontalStreight + ",0" + " ";
