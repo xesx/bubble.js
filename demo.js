@@ -10,7 +10,7 @@ function content(){
     var bubble = new Bubble(cont);
 
     
-    var div = bubble.create("test test test test test test test test test test test test test test test test test test", 120, 120, 0, 0, {tailBaseAngle: 40});
+    var div = bubble.create("test test test test test test test test test test test test test test test test test test", 120, 120, 0, 0, {tailBaseAngle: -120});
     // var div = bubble.create("test test test test", 0, 0);
 
 

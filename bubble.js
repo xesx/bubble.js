@@ -116,11 +116,14 @@ function Bubble(areaId){
 		var tailBaseP1Seg = pathBody.getPathSegAtLength(_self.options.tailBaseP1Distance);
 		var tailBaseP2Seg = pathBody.getPathSegAtLength(_self.options.tailBaseP2Distance);
 
+		_self.getPathForBodyWithTail();
 
 
 
+		// var pathBodyMain   = _self.getPathForBody(xBodySVG, yBodySVG);
 
-		var pathBodyMain   = _self.getPathForBody(xBodySVG, yBodySVG);
+		var pathBodyMain   = _self.getPathForBodyWithTail();
+
 		// var dBodyShadow = _self.getPathForBody(xBodySVG + _self.options.shadowH, yBodySVG + _self.options.shadowV);
 
 		// фильтр для тени
@@ -245,7 +248,52 @@ function Bubble(areaId){
 	}
 
 	//
-	//Формирование атрибута d для тела пузыря
+	//Формирование path тела пузыря
+	//
+	this.getPathForBodyWithTail = function(){
+		var path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+		var segList = path.pathSegList;
+
+		var bodyPath = _self.options.bodyPath;
+		var lengths  = _self.options.segBodyLenghts;
+		var radius   = _self.options.realRadius;
+
+		//номера сегментов
+		var tailBaseP1SegNumber = bodyPath.getPathSegAtLength(_self.options.tailBaseP1Distance);
+		var tailBaseP2SegNumber = bodyPath.getPathSegAtLength(_self.options.tailBaseP2Distance);
+
+		segList.appendItem(path.createSVGPathSegMovetoAbs(_self.options.tailBaseP2.x, _self.options.tailBaseP2.y));
+
+		var j = tailBaseP2SegNumber
+		for (var i = 0; i < 9; i++) {
+			// alert(i +" - " + j);
+
+			if(j % 2 == 0){ // дуга
+				segList.appendItem(path.createSVGPathSegArcAbs(bodyPath.getPointAtLength(lengths[j]).x, bodyPath.getPointAtLength(lengths[j]).y, radius, radius, 90, 0, 1));
+			} else{ // прямая
+				segList.appendItem(path.createSVGPathSegLinetoAbs(bodyPath.getPointAtLength(lengths[j]).x, bodyPath.getPointAtLength(lengths[j]).y));
+			}
+
+
+			j = (++j) % 10;
+			j = (j != 0) ? j : 1;
+		};
+
+
+		debugger
+
+		// segList.appendItem(path.createSVGPathSegLinetoHorizontalRel(horisontalStreight/2));
+		
+		// segList.appendItem(path.createSVGPathSegArcRel(radius, radius, radius, radius, 90, 0, 1));
+
+
+
+		return path;
+
+	}
+
+	//
+	//Формирование path тела пузыря
 	//
 	this.getPathForBody = function(xStart, yStart){
 		/*
@@ -266,46 +314,46 @@ function Bubble(areaId){
 
 		var segList = path.pathSegList;
 
-		var segLenghts = [];
+		var segBodyLenghts = [];
 
 		segList.appendItem(path.createSVGPathSegMovetoAbs((xStart + bodyWidth/2), yStart));
-		segLenghts.push(path.getTotalLength());
+		segBodyLenghts.push(path.getTotalLength());
 
 		segList.appendItem(path.createSVGPathSegLinetoHorizontalRel(horisontalStreight/2));
-		segLenghts.push(path.getTotalLength());
+		segBodyLenghts.push(path.getTotalLength());
 		
 		segList.appendItem(path.createSVGPathSegArcRel(radius, radius, radius, radius, 90, 0, 1));
-		segLenghts.push(path.getTotalLength());
+		segBodyLenghts.push(path.getTotalLength());
 
 		segList.appendItem(path.createSVGPathSegLinetoVerticalRel(verticalStreight));
-		segLenghts.push(path.getTotalLength());
+		segBodyLenghts.push(path.getTotalLength());
 
 		segList.appendItem(path.createSVGPathSegArcRel(-radius, radius, radius, radius, 90, 0, 1));
-		segLenghts.push(path.getTotalLength());
+		segBodyLenghts.push(path.getTotalLength());
 
 		segList.appendItem(path.createSVGPathSegLinetoHorizontalRel(-horisontalStreight));
-		segLenghts.push(path.getTotalLength());
+		segBodyLenghts.push(path.getTotalLength());
 
 		segList.appendItem(path.createSVGPathSegArcRel(-radius, -radius, radius, radius, 90, 0, 1));
-		segLenghts.push(path.getTotalLength());
+		segBodyLenghts.push(path.getTotalLength());
 
 		segList.appendItem(path.createSVGPathSegLinetoVerticalRel(-verticalStreight));
-		segLenghts.push(path.getTotalLength());
+		segBodyLenghts.push(path.getTotalLength());
 
 		segList.appendItem(path.createSVGPathSegArcRel(radius, -radius, radius, radius, 90, 0, 1));
-		segLenghts.push(path.getTotalLength());
+		segBodyLenghts.push(path.getTotalLength());
 
-		segList.appendItem(path.createSVGPathSegClosePath());
-		segLenghts.push(path.getTotalLength());
+		segList.appendItem(path.createSVGPathSegLinetoHorizontalRel(horisontalStreight/2));
+		segBodyLenghts.push(path.getTotalLength());
 
-		_self.optionAdd("segLenghts", segLenghts);
+		_self.optionAdd("segBodyLenghts", segBodyLenghts);
 
 
 		//Проходимся по все углам элемента чтобы при отрисовке path рисунок не обрезался
 		//Особенно заметно отсутствие этой строки при большом значении shadowBlurRadius
 		// d += "M0,0 M" + svgWidth + ",0 M" + svgWidth + "," + svgHeight + " M0," + svgHeight + " ";
 
-		return path;
+		return _self.optionAdd("bodyPath", path);
 	}
 
 	//
