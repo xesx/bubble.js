@@ -288,10 +288,10 @@ function Bubble(areaId){
 			j = (j != 0) ? j : 1;
 		};
 
-		segList.appendItem(path.createSVGPathSegLinetoAbs(_self.options.xTailSVG, _self.options.xTailSVG));
+		segList.appendItem(path.createSVGPathSegLinetoAbs(_self.options.xTailSVG, _self.options.yTailSVG));
 		segList.appendItem(path.createSVGPathSegLinetoAbs(_self.options.tailBaseP2.x, _self.options.tailBaseP2.y));
 
-		debugger
+		// debugger
 
 		return path;
 	}
