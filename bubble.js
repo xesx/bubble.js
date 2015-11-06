@@ -61,7 +61,9 @@ function Bubble(areaId){
 
 		var html = _self.createHTML(text, xBody, yBody);
 
-		var svg  = _self.createSVG(html);
+		var svg  = _self.createSVG();
+
+		html.insertAdjacentElement("afterBegin", svg);
 
 	}
 
@@ -156,7 +158,7 @@ function Bubble(areaId){
 		// svg.insertAdjacentElement("beforeEnd", pathBodyShadow);
 		svg.insertAdjacentElement("beforeEnd", pathBodyMain);
 
-		html.insertAdjacentElement("afterBegin", svg);
+		return svg;
 	}
 	
 	//
@@ -248,7 +250,7 @@ function Bubble(areaId){
 	}
 
 	//
-	//Формирование path тела пузыря
+	//Формирование path пузыря с хвостом
 	//
 	this.getPathForBodyWithTail = function(){
 		var path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
@@ -265,31 +267,33 @@ function Bubble(areaId){
 		segList.appendItem(path.createSVGPathSegMovetoAbs(_self.options.tailBaseP2.x, _self.options.tailBaseP2.y));
 
 		var j = tailBaseP2SegNumber
-		for (var i = 0; i < 9; i++) {
-			// alert(i +" - " + j);
-
+		var p = {};
+		for (var i = 0; i <= 9; i++) {
+			//целевая точка
+			p = bodyPath.getPointAtLength(lengths[j]);
+			//проверяем - является ли текущий сегмент последним
+			if(i > 1 && j == tailBaseP1SegNumber){
+				p = bodyPath.getPointAtLength(_self.options.tailBaseP1Distance);
+				i = 9;	// заканчиваем цикл после текущей итерации
+			}
+			
 			if(j % 2 == 0){ // дуга
-				segList.appendItem(path.createSVGPathSegArcAbs(bodyPath.getPointAtLength(lengths[j]).x, bodyPath.getPointAtLength(lengths[j]).y, radius, radius, 90, 0, 1));
+				segList.appendItem(path.createSVGPathSegArcAbs(p.x, p.y, radius, radius, 90, 0, 1));
 			} else{ // прямая
-				segList.appendItem(path.createSVGPathSegLinetoAbs(bodyPath.getPointAtLength(lengths[j]).x, bodyPath.getPointAtLength(lengths[j]).y));
+				segList.appendItem(path.createSVGPathSegLinetoAbs(p.x, p.y));
 			}
 
-
+			// 1 <= j <= 9
 			j = (++j) % 10;
 			j = (j != 0) ? j : 1;
 		};
 
+		segList.appendItem(path.createSVGPathSegLinetoAbs(_self.options.xTailSVG, _self.options.xTailSVG));
+		segList.appendItem(path.createSVGPathSegLinetoAbs(_self.options.tailBaseP2.x, _self.options.tailBaseP2.y));
 
 		debugger
 
-		// segList.appendItem(path.createSVGPathSegLinetoHorizontalRel(horisontalStreight/2));
-		
-		// segList.appendItem(path.createSVGPathSegArcRel(radius, radius, radius, radius, 90, 0, 1));
-
-
-
 		return path;
-
 	}
 
 	//
