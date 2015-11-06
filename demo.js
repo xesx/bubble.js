@@ -10,7 +10,12 @@ function content(){
     var bubble = new Bubble(cont);
 
     
-    var div = bubble.create("test test test test test test test test test test test test test test test test test test", 120, 120, 500, 200, {tailBaseAngle: 95, tailWidth: 30});
+    var div = bubble.create("test test test test test test test test test test"
+                          , 120, 120, 239, 30
+                          , {borderWidth: 1
+                           // , tailBaseAngle: 95
+                           , tailWidth: 30
+                            });
     // var div = bubble.create("test test test test", 0, 0);
 
 

@@ -23,8 +23,8 @@ function Bubble(areaId){
 	,	tailWidth            : 50              // ширина основания хвоста в пикселях (number)
 	,	tailBaseAngle        : undefined       // параметр задает угол исходя из которого будет рассчитана точка основания хвоста на периметре тела (number)
 	                                           // по умолчанию точка лежит на персечении прямой от конца хвоста до центра тела и периметра тела
-	,	tailP1               : {x: 0, y: 0}    // координаты первой опорной точки кривой Безье для отрисовки хвоста (object)
-	,	tailP2               : {x: 0, y: 0}    // координаты второй опорной точки кривой Безье для отрисовки хвоста (object)
+	,	tailCurveP1          : {x: 0, y: 0}    // координаты первой опорной точки кривой Безье для отрисовки хвоста (object{x: (number), y: (number)})
+	,	tailCurveP2          : {x: 0, y: 0}    // координаты второй опорной точки кривой Безье для отрисовки хвоста (object{x: (number), y: (number)})
 	                                           // координаты задаются как коэффициенты длины от начала кривой до ее конца по каждой из координат
 
 	}
@@ -224,13 +224,15 @@ function Bubble(areaId){
 
 		var angle = Math.atan((y2-y1)/(x2-x1)) * 180 / Math.PI;
 
-		if (x1 < x2 && y1 > y2){
-			return Math.abs(angle);
-		} else if (x1 < x2 && y1 < y2){
+		// debugger
+
+		if (x1 <= x2 && y1 >= y2){        // up-right
+			return 90 - Math.abs(angle);
+		} else if (x1 <= x2 && y1 <= y2){ // down-right
 			return Math.abs(angle) + 90;
-		} else if (x1 > x2 && y1 < y2){
-			return Math.abs(angle) + 180;
-		} else if (x1 > x2 && y1 > y2){
+		} else if (x1 >= x2 && y1 <= y2){ // down-left
+			return 90 - Math.abs(angle) + 180;
+		} else if (x1 >= x2 && y1 >= y2){ // up-left
 			return Math.abs(angle) + 270;
 		}
 
@@ -266,6 +268,7 @@ function Bubble(areaId){
 
 		segList.appendItem(path.createSVGPathSegMovetoAbs(_self.options.tailBaseP2.x, _self.options.tailBaseP2.y));
 
+		//Тело
 		var j = tailBaseP2SegNumber
 		var p = {};
 		for (var i = 0; i <= 9; i++) {
@@ -288,7 +291,9 @@ function Bubble(areaId){
 			j = (j != 0) ? j : 1;
 		};
 
+		//Хвост
 		segList.appendItem(path.createSVGPathSegLinetoAbs(_self.options.xTailSVG, _self.options.yTailSVG));
+		// createSVGPathSegCurvetoCubicAbs(x, y, x1, y1, x2, y2)
 		segList.appendItem(path.createSVGPathSegLinetoAbs(_self.options.tailBaseP2.x, _self.options.tailBaseP2.y));
 
 		// debugger
