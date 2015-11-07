@@ -23,8 +23,8 @@ function Bubble(areaId){
 	,	tailWidth            : 50              // ширина основания хвоста в пикселях (number)
 	,	tailBaseAngle        : undefined       // параметр задает угол исходя из которого будет рассчитана точка основания хвоста на периметре тела (number)
 	                                           // по умолчанию точка лежит на персечении прямой от конца хвоста до центра тела и периметра тела
-	,	tailCurveP1          : {x: 0, y: 0}    // координаты первой опорной точки кривой Безье для отрисовки хвоста (object{x: (number), y: (number)})
-	,	tailCurveP2          : {x: 0, y: 0}    // координаты второй опорной точки кривой Безье для отрисовки хвоста (object{x: (number), y: (number)})
+	,	tailCurveP1          : {x: undefined, y: undefined}    // координаты первой опорной точки кривой Безье для отрисовки хвоста (object{x: (number), y: (number)})
+	,	tailCurveP2          : {x: undefined, y: undefined}    // координаты второй опорной точки кривой Безье для отрисовки хвоста (object{x: (number), y: (number)})
 	                                           // координаты задаются как коэффициенты длины от начала кривой до ее конца по каждой из координат
 
 	}
@@ -81,16 +81,17 @@ function Bubble(areaId){
 		var bodyWidth  = _self.optionAdd("bodyWidth", _self.options.textWidth + _self.options.textPadding * 2);
 		var bodyHeight = _self.optionAdd("bodyHeight", _self.options.textHeight + _self.options.textPadding * 2);
 
-		var offsetX = _self.optionAdd("offsetX", (xBody < xTail) ? 0 : Math.abs(xBody - xTail)); 
-		var offsetY = _self.optionAdd("offsetY", (yBody < yTail) ? 0 : Math.abs(yBody - yTail));
-
 		//отступ
 		var indent = _self.optionAdd("indent", _self.options.borderWidth + _self.getErValue("bigger", [_self.options.shadowH, _self.options.shadowV]) + _self.options.shadowBlurRadius * 3);
 
+		//смещение
+		var offsetX = _self.optionAdd("offsetX", ((xBody < xTail) ? 0 : Math.abs(xBody - xTail)) + indent); 
+		var offsetY = _self.optionAdd("offsetY", ((yBody < yTail) ? 0 : Math.abs(yBody - yTail)) + indent);
+
 		// Устанавливаем элементу svg атрибуты
 		svg.style.position = "absolute";
-		svg.style.left     = _self.optionAdd("xSVG", -offsetX -(indent)) + "px";
-		svg.style.top      = _self.optionAdd("ySVG", -offsetY -(indent)) + "px";
+		svg.style.left     = _self.optionAdd("xSVG", -offsetX) + "px";
+		svg.style.top      = _self.optionAdd("ySVG", -offsetY) + "px";
 		
 		svg.style.width    = _self.optionAdd("SVGWidth", _self.getSVGSize(xBody, xTail, bodyWidth) + indent * 2) + "px";
 		svg.style.height   = _self.optionAdd("SVGHeight", _self.getSVGSize(yBody, yTail, bodyHeight) + indent * 2) + "px";
@@ -98,25 +99,39 @@ function Bubble(areaId){
 		//Вычисляем реальный радиус скругления границ
 		var realRadius = _self.optionAdd("realRadius", _self.getBorderRadius());
 
-		//Координаты верхнего левого угла тела пузыря в svg-элементе
-		var xBodySVG = _self.optionAdd("xBodySVG", offsetX + indent);
-		var yBodySVG = _self.optionAdd("yBodySVG", offsetY + indent);
+		//Рассчитываем координаты пузыря
+		_self.calcBubbleCoordinatesInSVG();
 
-		//Координаты конца хвоста в svg-элементе
-		var xTailSVG = _self.optionAdd("xTailSVG", (xTail - xBody - _self.options.xSVG));
-		var yTailSVG = _self.optionAdd("yTailSVG", (yTail - yBody - _self.options.ySVG));
+		//Нужно ли увеличивать элемент SVG
+		var addSVGWidth  = _self.getErValue("s", [_self.options.SVGWidth, _self.options.tailCurveP1Abs.x, _self.options.tailCurveP2Abs.x]);
+		var addSVGHeight = _self.getErValue("s", [_self.options.SVGHeight, _self.options.tailCurveP1Abs.y, _self.options.tailCurveP2Abs.y]);
 
-		_self.setPoint(svg, xTailSVG, yTailSVG);		
+		if(addSVGWidth < 0 || addSVGHeight < 0){
+			addSVGWidth  = (addSVGWidth  < 0) ? Math.abs(addSVGWidth)  : 0; 
+			addSVGHeight = (addSVGHeight < 0) ? Math.abs(addSVGHeight) : 0;
+
+			_self.options.offsetX += addSVGWidth;
+			_self.options.offsetY += addSVGHeight;
+
+			svg.style.width = _self.options.SVGWidth += addSVGHeight;
+			svg.style.left  = _self.optionAdd("xSVG", -_self.options.offsetX) + "px";
+
+			svg.style.height = _self.options.SVGHeight += addSVGHeight;
+			svg.style.top    = _self.optionAdd("ySVG", -_self.options.offsetY) + "px";
+
+			_self.calcBubbleCoordinatesInSVG();
+
+		}
+
+
+
+
 		
-		// временный элемент path который описывает тело пузыря
-		var pathBody = _self.optionAdd("pathBody", _self.getPathForBody(_self.options.xBodySVG, _self.options.yBodySVG));
-		
-		//Расчитываем координаты основания хвоста
-		_self.getTailBasePoints();
+
 
 		//сегменты в которых находятся точки основания
-		var tailBaseP1Seg = pathBody.getPathSegAtLength(_self.options.tailBaseP1Distance);
-		var tailBaseP2Seg = pathBody.getPathSegAtLength(_self.options.tailBaseP2Distance);
+		var tailBaseP1Seg = _self.options.pathBody.getPathSegAtLength(_self.options.tailBaseP1Distance);
+		var tailBaseP2Seg = _self.options.pathBody.getPathSegAtLength(_self.options.tailBaseP2Distance);
 
 		_self.getPathForBodyWithTail();
 
@@ -160,11 +175,45 @@ function Bubble(areaId){
 
 		return svg;
 	}
+
+	//
+	//Рассчитываем координаты всех элементов пузыря
+	//
+	this.calcBubbleCoordinatesInSVG = function(){
+		//Координаты верхнего левого угла тела пузыря в svg-элементе
+		var xBodySVG = _self.optionAdd("xBodySVG", _self.options.offsetX);
+		var yBodySVG = _self.optionAdd("yBodySVG", _self.options.offsetY);
+
+		//Координаты конца хвоста в svg-элементе
+		var temp = _self.coordinatesToSVG(_self.options.xTail, _self.options.yTail);
+		var xTailSVG = _self.optionAdd("xTailSVG", temp.x);
+		var yTailSVG = _self.optionAdd("yTailSVG", temp.y);
+		
+		// временный элемент path который описывает тело пузыря
+		var pathBody = _self.optionAdd("pathBody", _self.getPathForBody(_self.options.xBodySVG, _self.options.yBodySVG));
+		
+		//Расчитываем координаты основания хвоста
+		_self.calcTailBasePoints();
+		//Расчитываем координаты опорных точек
+		_self.calcTailCurvePoints();
+	}
+
+	//
+	//Конвертирование точки из системы координат Container в SVG
+	//
+	this.coordinatesToSVG = function(x, y){
+		var p = {};
+
+		p.x = x - _self.options.xBody - _self.options.xSVG;
+		p.y = y - _self.options.yBody - _self.options.ySVG;
+
+		return p;
+	}
 	
 	//
 	//Определение точек основания хвоста
 	//
-	this.getTailBasePoints = function(){
+	this.calcTailBasePoints = function(){
 		// временный элемент path который описывает тело пузыря
 		var pathBody = _self.options.pathBody;
 
@@ -182,12 +231,12 @@ function Bubble(areaId){
 		}
 
 		//расстояние от начала path до центра основания хвоста
-		var centerTailBaseDistance = angle/360 * bodyPrimeterLength;
+		var centerTailBaseDistance = _self.optionAdd("centerTailBaseDistance", angle/360 * bodyPrimeterLength);
 
 		//точка - центр основания хвоста
-		var centerTailBase = pathBody.getPointAtLength(centerTailBaseDistance);
+		var centerTailBase = _self.optionAdd("centerTailBase", pathBody.getPointAtLength(centerTailBaseDistance));
 
-		_self.setPoint(_self.options.SVGElement, centerTailBase.x, centerTailBase.y);
+		// _self.setPoint(_self.options.SVGElement, centerTailBase.x, centerTailBase.y);
 
 
 		//ширина основания хвоста (не должна быть больше половины длины периметра)
@@ -206,9 +255,6 @@ function Bubble(areaId){
 		//точки основания хвоста
 		var tailBaseP1 = _self.optionAdd("tailBaseP1", pathBody.getPointAtLength(tailBaseP1Distance));
 		var tailBaseP2 = _self.optionAdd("tailBaseP2", pathBody.getPointAtLength(tailBaseP2Distance));
-
-		_self.setPoint(_self.options.SVGElement, tailBaseP1.x, tailBaseP1.y, "yellow");
-		_self.setPoint(_self.options.SVGElement, tailBaseP2.x, tailBaseP2.y, "red");
 	}
 
 	//
@@ -242,6 +288,13 @@ function Bubble(areaId){
 	//Получение размеров svg-элемента
 	//
 	this.getSVGSize = function(cBody, cTail, bodyLong){
+		// cBody    - координата верхнего левого угла тела (x или y)
+		// cTail    - координата конца хвоста (x или y)
+		// bodyLong - длина тела (высота или ширина)
+
+		// если надо получить ширину передаем координаты хвоста и тела по оси x и ширину
+		// если надо получить высоту передаем координаты хвоста и тела по оси y и высоту
+
 		if(cTail < cBody){
 			return cBody + bodyLong - cTail;
 		} else if(cTail <= (cBody + bodyLong)){
@@ -250,6 +303,37 @@ function Bubble(areaId){
 			return cTail - cBody;
 		}
 	}
+
+	//
+	//Расчитаем опорные точки кривой Безье для построения хвоста в SVG-элементе
+	//
+	this.calcTailCurvePoints = function(){
+		var p1 = {}; // первая контрольная точка кривой Безье
+		var p2 = {}; // вторая контрольная точка кривой Безье
+
+		if(_self.options.tailCurveP1.x == undefined || _self.options.tailCurveP1.y == undefined){ // если координаты опорных точек не определены
+			p1.x = _self.options.xTailSVG;
+			p1.y = _self.options.yTailSVG;
+			p1.defined = false;
+		} else{
+			p1.x = _self.options.centerTailBase.x + Math.abs(_self.options.xTailSVG - _self.options.centerTailBase.x) * _self.options.tailCurveP1.x;
+			p1.y = _self.options.centerTailBase.y + Math.abs(_self.options.yTailSVG - _self.options.centerTailBase.y) * _self.options.tailCurveP1.y			
+			p1.defined = true;
+		}
+
+		if(_self.options.tailCurveP2.x == undefined || _self.options.tailCurveP2.y == undefined){ // если координаты опорных точек не определены
+			p2 = p1;
+		} else{
+			p2.x = _self.options.centerTailBase.x + Math.abs(_self.options.xTailSVG - _self.options.centerTailBase.x) * _self.options.tailCurveP2.x;
+			p2.y = _self.options.centerTailBase.y + Math.abs(_self.options.yTailSVG - _self.options.centerTailBase.y) * _self.options.tailCurveP2.y;
+
+			if (!p1.defined) p1 = p2; // на случай ели p2 определена, а p1 нет
+		}
+
+		_self.options.tailCurveP1Abs = p1;
+		_self.options.tailCurveP2Abs = p2;
+	}
+
 
 	//
 	//Формирование path пузыря с хвостом
@@ -269,32 +353,73 @@ function Bubble(areaId){
 		segList.appendItem(path.createSVGPathSegMovetoAbs(_self.options.tailBaseP2.x, _self.options.tailBaseP2.y));
 
 		//Тело
-		var j = tailBaseP2SegNumber
-		var p = {};
+		var segment = tailBaseP2SegNumber
+		var targetPoint = {};
 		for (var i = 0; i <= 9; i++) {
 			//целевая точка
-			p = bodyPath.getPointAtLength(lengths[j]);
+			targetPoint = bodyPath.getPointAtLength(lengths[segment]);
 			//проверяем - является ли текущий сегмент последним
-			if(i > 1 && j == tailBaseP1SegNumber){
-				p = bodyPath.getPointAtLength(_self.options.tailBaseP1Distance);
+			if(i > 1 && segment == tailBaseP1SegNumber){
+				targetPoint = bodyPath.getPointAtLength(_self.options.tailBaseP1Distance);
 				i = 9;	// заканчиваем цикл после текущей итерации
 			}
 			
-			if(j % 2 == 0){ // дуга
-				segList.appendItem(path.createSVGPathSegArcAbs(p.x, p.y, radius, radius, 90, 0, 1));
+			if(segment % 2 == 0){ // дуга
+				segList.appendItem(path.createSVGPathSegArcAbs(targetPoint.x, targetPoint.y, radius, radius, 90, 0, 1));
 			} else{ // прямая
-				segList.appendItem(path.createSVGPathSegLinetoAbs(p.x, p.y));
+				segList.appendItem(path.createSVGPathSegLinetoAbs(targetPoint.x, targetPoint.y));
 			}
 
-			// 1 <= j <= 9
-			j = (++j) % 10;
-			j = (j != 0) ? j : 1;
+			// 1 <= segment <= 9
+			segment = (++segment) % 10;
+			segment = (segment != 0) ? segment : 1;
 		};
 
 		//Хвост
-		segList.appendItem(path.createSVGPathSegLinetoAbs(_self.options.xTailSVG, _self.options.yTailSVG));
-		// createSVGPathSegCurvetoCubicAbs(x, y, x1, y1, x2, y2)
-		segList.appendItem(path.createSVGPathSegLinetoAbs(_self.options.tailBaseP2.x, _self.options.tailBaseP2.y));
+		var p1 = _self.options.tailCurveP1Abs; // первая контрольная точка кривой Безье
+		var p2 = _self.options.tailCurveP2Abs; // вторая контрольная точка кривой Безье
+
+		// if(_self.options.tailCurveP1.x == undefined || _self.options.tailCurveP1.y == undefined){ // если координаты опорных точек не определены
+		// 	p1.x = _self.options.xTailSVG;
+		// 	p1.y = _self.options.yTailSVG;
+		// 	p1.defined = false;
+		// } else{
+		// 	p1.x = _self.options.centerTailBase.x + Math.abs(_self.options.xTailSVG - _self.options.centerTailBase.x) * _self.options.tailCurveP1.x;
+		// 	p1.y = _self.options.centerTailBase.y + Math.abs(_self.options.yTailSVG - _self.options.centerTailBase.y) * _self.options.tailCurveP1.y			
+		// 	p1.defined = true;
+		// }
+
+		// if(_self.options.tailCurveP2.x == undefined || _self.options.tailCurveP2.y == undefined){ // если координаты опорных точек не определены
+		// 	p2 = p1;
+		// } else{
+		// 	p2.x = _self.options.centerTailBase.x + Math.abs(_self.options.xTailSVG - _self.options.centerTailBase.x) * _self.options.tailCurveP2.x;
+		// 	p2.y = _self.options.centerTailBase.y + Math.abs(_self.options.yTailSVG - _self.options.centerTailBase.y) * _self.options.tailCurveP2.y;
+
+		// 	if (!p1.defined) p1 = p2; // на случай ели p2 определена, а p1 нет
+		// }
+
+		// debugger
+		_self.setPoint(_self.options.SVGElement, p1.x, p1.y, "white");
+		_self.setPoint(_self.options.SVGElement, p2.x, p2.y, "black");
+
+		segList.appendItem(path.createSVGPathSegCurvetoCubicAbs(_self.options.xTailSVG  // x
+															  , _self.options.yTailSVG  // y
+															  , p1.x // x1
+															  , p1.y // y1
+															  , p2.x  // x2
+															  , p2.y  // y2
+															  ));
+
+
+		segList.appendItem(path.createSVGPathSegCurvetoCubicAbs(_self.options.tailBaseP2.x  // x
+															  , _self.options.tailBaseP2.y  // y
+															  , p2.x  // x1
+															  , p2.y  // y1
+															  , p1.x  // x2
+															  , p1.y  // y2
+															  ));
+
+		
 
 		// debugger
 
