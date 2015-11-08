@@ -24,7 +24,7 @@ function Bubble(areaId){
 	,	tailBaseAngle        : undefined       // параметр задает угол исходя из которого будет рассчитана точка основания хвоста на периметре тела (number)
 	,	tailCurveP1          : {x: undefined, y: undefined}    // координаты первой опорной точки кривой Безье для отрисовки хвоста (object{x: (number), y: (number)})
 	,	tailCurveP2          : {x: undefined, y: undefined}    // координаты второй опорной точки кривой Безье для отрисовки хвоста (object{x: (number), y: (number)})
-	                                           // координаты задаются как коэффициенты длины от начала кривой до ее конца по каждой из координат
+	                                           // координаты задаются в системе, где центр основания хвоста это точка [0, 0]
 
 	}
 
@@ -315,16 +315,20 @@ function Bubble(areaId){
 			p1.y = _self.options.yTailSVG;
 			p1.defined = false;
 		} else{
-			p1.x = _self.options.centerTailBase.x + Math.abs(_self.options.xTailSVG - _self.options.centerTailBase.x) * _self.options.tailCurveP1.x;
-			p1.y = _self.options.centerTailBase.y + Math.abs(_self.options.yTailSVG - _self.options.centerTailBase.y) * _self.options.tailCurveP1.y			
+			// p1.x = _self.options.centerTailBase.x + Math.abs(_self.options.xTailSVG - _self.options.centerTailBase.x) * _self.options.tailCurveP1.x;
+			// p1.y = _self.options.centerTailBase.y + Math.abs(_self.options.yTailSVG - _self.options.centerTailBase.y) * _self.options.tailCurveP1.y;
+			p1.x = _self.options.centerTailBase.x + _self.options.tailCurveP1.x;
+			p1.y = _self.options.centerTailBase.y + _self.options.tailCurveP1.y;
 			p1.defined = true;
 		}
 
 		if(_self.options.tailCurveP2.x == undefined || _self.options.tailCurveP2.y == undefined){ // если координаты опорных точек не определены
 			p2 = p1;
 		} else{
-			p2.x = _self.options.centerTailBase.x + Math.abs(_self.options.xTailSVG - _self.options.centerTailBase.x) * _self.options.tailCurveP2.x;
-			p2.y = _self.options.centerTailBase.y + Math.abs(_self.options.yTailSVG - _self.options.centerTailBase.y) * _self.options.tailCurveP2.y;
+			// p2.x = _self.options.centerTailBase.x + Math.abs(_self.options.xTailSVG - _self.options.centerTailBase.x) * _self.options.tailCurveP2.x;
+			// p2.y = _self.options.centerTailBase.y + Math.abs(_self.options.yTailSVG - _self.options.centerTailBase.y) * _self.options.tailCurveP2.y;
+			p2.x = _self.options.centerTailBase.x + _self.options.tailCurveP2.x;
+			p2.y = _self.options.centerTailBase.y + _self.options.tailCurveP2.y;
 
 			if (!p1.defined) p1 = p2; // на случай ели p2 определена, а p1 нет
 		}

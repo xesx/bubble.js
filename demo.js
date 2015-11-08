@@ -56,7 +56,7 @@ function content(){
     // bubble.create("up up up up", 195, 400, 240, 200, {tailCurveP1: {x: 0, y: 0}});
     // bubble.create("up__ left"  , 300, 400, 240, 200, {tailCurveP1: {x: 0, y: 0}});
     // bubble.create("left_ down" , 550, 90 , 240, 200, {tailCurveP1: {x: 0, y: 0}});
-    bubble.create("left_ left_", 550, 175, 240, 200, {tailCurveP1: {x: -0.5, y: 12}});
+    bubble.create("left_ left_", 550, 175, 240, 150, {tailCurveP1: {x: -50, y: 50}, tailCurveP2: {x: -100, y: -50}});
     // bubble.create("left_ up "  , 550, 280, 240, 200, {tailCurveP1: {x: 0, y: 0}, tailCurveP2: {x: -0.5, y: 0.5}});
 
 
