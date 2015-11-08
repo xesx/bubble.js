@@ -20,9 +20,8 @@ function Bubble(areaId){
 	,	shadowV              : 0               // смещение тени по вертикали (number)
 	,	shadowBlurRadius     : 0               // радиус размытия тени (number)
 	
-	,	tailWidth            : 50              // ширина основания хвоста в пикселях (number)
+	,	tailWidth            : 20              // ширина основания хвоста в пикселях (number)
 	,	tailBaseAngle        : undefined       // параметр задает угол исходя из которого будет рассчитана точка основания хвоста на периметре тела (number)
-	                                           // по умолчанию точка лежит на персечении прямой от конца хвоста до центра тела и периметра тела
 	,	tailCurveP1          : {x: undefined, y: undefined}    // координаты первой опорной точки кривой Безье для отрисовки хвоста (object{x: (number), y: (number)})
 	,	tailCurveP2          : {x: undefined, y: undefined}    // координаты второй опорной точки кривой Безье для отрисовки хвоста (object{x: (number), y: (number)})
 	                                           // координаты задаются как коэффициенты длины от начала кривой до ее конца по каждой из координат
@@ -102,7 +101,11 @@ function Bubble(areaId){
 		//Рассчитываем координаты пузыря
 		_self.calcBubbleCoordinatesInSVG();
 
-		//Нужно ли увеличивать элемент SVG
+		//Нужно ли увеличивать элемент SVG справа и/или снизу
+		svg.style.width    = _self.getErValue("b", [_self.options.SVGWidth, _self.options.tailCurveP1Abs.x, _self.options.tailCurveP2Abs.x]);
+		svg.style.height   = _self.getErValue("b", [_self.options.SVGHeight, _self.options.tailCurveP1Abs.y, _self.options.tailCurveP2Abs.y]);
+
+		//Нужно ли увеличивать элемент SVG слева и/или сверху
 		var addSVGWidth  = _self.getErValue("s", [_self.options.SVGWidth, _self.options.tailCurveP1Abs.x, _self.options.tailCurveP2Abs.x]);
 		var addSVGHeight = _self.getErValue("s", [_self.options.SVGHeight, _self.options.tailCurveP1Abs.y, _self.options.tailCurveP2Abs.y]);
 
@@ -125,8 +128,6 @@ function Bubble(areaId){
 
 		}
 
-
-
 		//сегменты в которых находятся точки основания
 		var tailBaseP1Seg = _self.options.pathBody.getPathSegAtLength(_self.options.tailBaseP1Distance);
 		var tailBaseP2Seg = _self.options.pathBody.getPathSegAtLength(_self.options.tailBaseP2Distance);
@@ -137,8 +138,6 @@ function Bubble(areaId){
 		pathBodyMain.style.fill        = _self.options.fill;
 		pathBodyMain.style.stroke      = _self.options.borderColor;
 		pathBodyMain.style.strokeWidth = _self.options.borderWidth;
-
-
 
 
 		// фильтр для тени
@@ -156,14 +155,18 @@ function Bubble(areaId){
 		// Тень
 		// debugger
 		var pathBodyShadow = document.createElementNS("http://www.w3.org/2000/svg", 'path');
-		pathBodyShadow.setAttribute("d", pathBodyMain.getAttribute("d"));
+		
+		var dPathBodyShadow = pathBodyMain.getAttribute("d");
+		//Проходимся по все углам элемента чтобы при отрисовке path рисунок не обрезался
+		//Особенно заметно отсутствие этой строки при большом значении shadowBlurRadius
+		dPathBodyShadow += " M0,0 M" + _self.options.SVGWidth + ",0 M" + _self.options.SVGWidth + "," + _self.options.SVGHeight + " M0," + _self.options.SVGHeight + " ";
+
+		pathBodyShadow.setAttribute("d", dPathBodyShadow);
 		pathBodyShadow.setAttribute("filter", "url(#shadow)");
 		pathBodyShadow.setAttribute("transform", "translate(" + _self.options.shadowH + "," + _self.options.shadowV + ")");
 
 		// shadowV
 		pathBodyShadow.style.fill = _self.options.shadowColor;
-
-		
 
 		// вставляем в элемент svg
 		svg.insertAdjacentElement("afterBegin", defs);
@@ -234,7 +237,6 @@ function Bubble(areaId){
 		var centerTailBase = _self.optionAdd("centerTailBase", pathBody.getPointAtLength(centerTailBaseDistance));
 
 		// _self.setPoint(_self.options.SVGElement, centerTailBase.x, centerTailBase.y);
-
 
 		//ширина основания хвоста (не должна быть больше половины длины периметра)
 		var tailWidth = (_self.options.tailWidth > bodyPrimeterLength/2) ? bodyPrimeterLength/2 : _self.options.tailWidth;
@@ -376,28 +378,8 @@ function Bubble(areaId){
 		var p1 = _self.options.tailCurveP1Abs; // первая контрольная точка кривой Безье
 		var p2 = _self.options.tailCurveP2Abs; // вторая контрольная точка кривой Безье
 
-		// if(_self.options.tailCurveP1.x == undefined || _self.options.tailCurveP1.y == undefined){ // если координаты опорных точек не определены
-		// 	p1.x = _self.options.xTailSVG;
-		// 	p1.y = _self.options.yTailSVG;
-		// 	p1.defined = false;
-		// } else{
-		// 	p1.x = _self.options.centerTailBase.x + Math.abs(_self.options.xTailSVG - _self.options.centerTailBase.x) * _self.options.tailCurveP1.x;
-		// 	p1.y = _self.options.centerTailBase.y + Math.abs(_self.options.yTailSVG - _self.options.centerTailBase.y) * _self.options.tailCurveP1.y			
-		// 	p1.defined = true;
-		// }
-
-		// if(_self.options.tailCurveP2.x == undefined || _self.options.tailCurveP2.y == undefined){ // если координаты опорных точек не определены
-		// 	p2 = p1;
-		// } else{
-		// 	p2.x = _self.options.centerTailBase.x + Math.abs(_self.options.xTailSVG - _self.options.centerTailBase.x) * _self.options.tailCurveP2.x;
-		// 	p2.y = _self.options.centerTailBase.y + Math.abs(_self.options.yTailSVG - _self.options.centerTailBase.y) * _self.options.tailCurveP2.y;
-
-		// 	if (!p1.defined) p1 = p2; // на случай ели p2 определена, а p1 нет
-		// }
-
-		// debugger
-		_self.setPoint(_self.options.SVGElement, p1.x, p1.y, "white");
-		_self.setPoint(_self.options.SVGElement, p2.x, p2.y, "black");
+		// _self.setPoint(_self.options.SVGElement, p1.x, p1.y, "white");
+		// _self.setPoint(_self.options.SVGElement, p2.x, p2.y, "black");
 
 		segList.appendItem(path.createSVGPathSegCurvetoCubicAbs(_self.options.xTailSVG  // x
 															  , _self.options.yTailSVG  // y
@@ -415,10 +397,6 @@ function Bubble(areaId){
 															  , p1.x  // x2
 															  , p1.y  // y2
 															  ));
-
-		
-
-		// debugger
 
 		return path;
 	}
@@ -479,11 +457,6 @@ function Bubble(areaId){
 
 		_self.optionAdd("segBodyLenghts", segBodyLenghts);
 
-
-		//Проходимся по все углам элемента чтобы при отрисовке path рисунок не обрезался
-		//Особенно заметно отсутствие этой строки при большом значении shadowBlurRadius
-		// d += "M0,0 M" + svgWidth + ",0 M" + svgWidth + "," + svgHeight + " M0," + svgHeight + " ";
-
 		return _self.optionAdd("bodyPath", path);
 	}
 
@@ -520,7 +493,7 @@ function Bubble(areaId){
 
 		bubbleContainer.style.position = "absolute";
 		bubbleContainer.style.display  = "inline-block";
-		bubbleContainer.style.maxWidth = _self.options.textMaxWidth + "px";
+		bubbleContainer.style.width    = _self.options.textMaxWidth + "px";
 		bubbleContainer.style.left     = xBody + "px";
 		bubbleContainer.style.top      = yBody + "px";
 
@@ -551,12 +524,13 @@ function Bubble(areaId){
 		var textHeight = _self.optionAdd("textHeight", parseInt(textContainer.offsetHeight));
 
 		// Фиксируем ширину и высоту текстового контейнера
-		textContainer.style.width    = textWidth + "px";
+		textContainer.style.width    = textWidth + 1 + "px"; // добавляем один пиксель на случай если ширина больше на десятые или сотые доли единицы
 		textContainer.style.height   = textHeight + "px";
-		textContainer.style.position = "absolute";		
+		textContainer.style.position = "absolute";
+
 
 		//удаляем лишний атрибут у общего контейнера
-		bubbleContainer.style.maxWidth = "";
+		bubbleContainer.style.width = "";
 
 		//возвращаем созданный элемент-контейнер нашего пузыря
 		return bubbleContainer;
