@@ -11,9 +11,9 @@ function Bubble(areaId){
 	,	fontFamily           : "Comic Sans MS" // семейство шрифтов для текста (string)
 	,	fontSize             : 16              // размер шрифта в пикселях (number)
 	,	fontColor            : "#000000"       // цвет шрифта (color)
-	,	borderWidth          : 1               // ширина границ (number)
+	,	borderWidth          : 0.5             // ширина границ (number)
 	,	borderColor          : "#000000"       // цвет границ (color)
-	,	borderRadius         : 40              // радиус скругления углов границ
+	,	borderRadius         : 9000            // радиус скругления углов границ
 	,	fill                 : "#FFFFFF"       // цвет заливки (color)
 	,	shadowColor          : "#000000"       // цвет тени (color)
 	,	shadowH              : 0               // смещение тени по горизонтали (number)
@@ -106,10 +106,11 @@ function Bubble(areaId){
 		var addSVGWidth  = _self.getErValue("s", [_self.options.SVGWidth, _self.options.tailCurveP1Abs.x, _self.options.tailCurveP2Abs.x]);
 		var addSVGHeight = _self.getErValue("s", [_self.options.SVGHeight, _self.options.tailCurveP1Abs.y, _self.options.tailCurveP2Abs.y]);
 
-		if(addSVGWidth < 0 || addSVGHeight < 0){
+		if(addSVGWidth < 0 || addSVGHeight < 0){ // если нужно
 			addSVGWidth  = (addSVGWidth  < 0) ? Math.abs(addSVGWidth)  : 0; 
 			addSVGHeight = (addSVGHeight < 0) ? Math.abs(addSVGHeight) : 0;
 
+			// то пересчитываем размеры SVG
 			_self.options.offsetX += addSVGWidth;
 			_self.options.offsetY += addSVGHeight;
 
@@ -119,29 +120,26 @@ function Bubble(areaId){
 			svg.style.height = _self.options.SVGHeight += addSVGHeight;
 			svg.style.top    = _self.optionAdd("ySVG", -_self.options.offsetY) + "px";
 
+			//и координаты пузыря внутри элемента SVG
 			_self.calcBubbleCoordinatesInSVG();
 
 		}
 
 
 
-
-		
-
-
 		//сегменты в которых находятся точки основания
 		var tailBaseP1Seg = _self.options.pathBody.getPathSegAtLength(_self.options.tailBaseP1Distance);
 		var tailBaseP2Seg = _self.options.pathBody.getPathSegAtLength(_self.options.tailBaseP2Distance);
 
-		_self.getPathForBodyWithTail();
-
-
-
-		// var pathBodyMain   = _self.getPathForBody(xBodySVG, yBodySVG);
-
+		//Формируем окончательный path для полного рисунка пузыря с хвостом
 		var pathBodyMain   = _self.getPathForBodyWithTail();
 
-		// var dBodyShadow = _self.getPathForBody(xBodySVG + _self.options.shadowH, yBodySVG + _self.options.shadowV);
+		pathBodyMain.style.fill        = _self.options.fill;
+		pathBodyMain.style.stroke      = _self.options.borderColor;
+		pathBodyMain.style.strokeWidth = _self.options.borderWidth;
+
+
+
 
 		// фильтр для тени
 		var defs = document.createElementNS("http://www.w3.org/2000/svg", 'defs');
@@ -155,22 +153,21 @@ function Bubble(areaId){
 		filter.insertAdjacentElement("beforeEnd", feGaussianBlur);
 		defs.insertAdjacentElement("beforeEnd", filter);
 
-		// path для тени Body
-		// var pathBodyShadow = document.createElementNS("http://www.w3.org/2000/svg", 'path');
-		// pathBodyShadow.setAttribute("d", dBodyShadow);
-		// pathBodyShadow.setAttribute("filter", "url(#shadow)");
-		// pathBodyShadow.style.fill = _self.options.shadowColor;
+		// Тень
+		// debugger
+		var pathBodyShadow = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+		pathBodyShadow.setAttribute("d", pathBodyMain.getAttribute("d"));
+		pathBodyShadow.setAttribute("filter", "url(#shadow)");
+		pathBodyShadow.setAttribute("transform", "translate(" + _self.options.shadowH + "," + _self.options.shadowV + ")");
 
-		// path для фона Body
-		// var pathBodyFill = document.createElementNS("http://www.w3.org/2000/svg", 'path');
-		// pathBodyFill.setAttribute("d", dBodyMain);
-		pathBodyMain.style.fill = _self.options.fill;
-		pathBodyMain.style.stroke      = _self.options.borderColor;
-		pathBodyMain.style.strokeWidth = _self.options.borderWidth;
+		// shadowV
+		pathBodyShadow.style.fill = _self.options.shadowColor;
+
+		
 
 		// вставляем в элемент svg
-		// svg.insertAdjacentElement("afterBegin", defs);
-		// svg.insertAdjacentElement("beforeEnd", pathBodyShadow);
+		svg.insertAdjacentElement("afterBegin", defs);
+		svg.insertAdjacentElement("beforeEnd", pathBodyShadow);
 		svg.insertAdjacentElement("beforeEnd", pathBodyMain);
 
 		return svg;

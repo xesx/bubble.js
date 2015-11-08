@@ -12,30 +12,12 @@ function content(){
     
     bubble.create("test test test test test test test test test test"
                           , 120, 120, 450, 450
-                          , {borderWidth: 1
-                           , tailBaseAngle: 120
+                          , {tailBaseAngle: 180
                            , tailWidth: 20
                            , tailCurveP1: {x: 0, y: 0.3}
-                           , tailCurveP2: {x: 0.7, y: 0.6}
+                           , tailCurveP2: {x: 0.7, y: 0.3}
                             });
 
-    bubble.create("test test test test test test test test test test"
-                          , 120, 120, 50, 450
-                          , {borderWidth: 0.50
-                           , tailBaseAngle: -120
-                           , tailWidth: 20
-                           , tailCurveP1: {x: 0, y: 0.3}
-                           , tailCurveP2: {x: -0.7, y: 0.6}
-                            });
-
-    bubble.create("test test test test test test test test test test"
-                          , 120, 120, 450, 450
-                          , {borderWidth: 0
-                           , tailBaseAngle: 120
-                           , tailWidth: 20
-                           , tailCurveP1: {x: 0, y: 0.3}
-                           , tailCurveP2: {x: 0.7, y: 0.6}
-                            });
 
     // var div = bubble.create("test test test test", 0, 0);
 
