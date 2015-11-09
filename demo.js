@@ -7,6 +7,44 @@ function content(){
 
     cont.innerHTML = '';
 
+    var cell = 10;
+    var div;
+    for (var i = 0; i < 500; i += cell) {
+        div = document.createElement("div");
+        div.style.borderBottom = "1px solid #999";
+        div.style.height = (cell - 1) + "px";
+        div.style.width = 500 + 12 + "px";
+        div.style.position = "absolute";
+        div.style.left = -12 + "px";
+        div.style.top = i + "px";
+        div.style.fontSize = 6 + "px";
+        div.innerHTML = i;
+        cont.insertAdjacentElement("beforeEnd", div);
+    };
+
+    for (var i = 0; i < 500; i += cell) {
+        div = document.createElement("div");
+        div.style.borderRight = "1px solid #999";
+        div.style.height = 500 + 12 + "px";
+        div.style.width = (cell - 1) + "px";
+        div.style.position = "absolute";
+        div.style.left = i + "px";
+        div.style.top = -12 + "px";
+        div.style.fontSize = 6 + "px";
+        div.innerHTML = i;
+        cont.insertAdjacentElement("beforeEnd", div);
+    };
+
+  
+
+
+
+
+
+
+
+
+
     var bubble = new Bubble(cont);
 
     
@@ -52,10 +90,10 @@ function content(){
     // bubble.create("right down" ,   0, 130, 240, 200, {tailCurveP1: {x: 0, y: 0}});
     // bubble.create("right right",   0, 175, 240, 200, {tailCurveP1: {x: 0, y: 0}});
     // bubble.create("right up "  ,   0, 230, 240, 200, {tailCurveP1: {x: 0, y: 0}});
-    // bubble.create("up__ right" , 100, 400, 240, 200, {tailCurveP1: {x: 0, y: 0}});
+    bubble.create("up__ right" , 100, 400, 240, 200, {tailCurveP1: {x: 0, y: 0}});
     // bubble.create("up up up up", 195, 400, 240, 200, {tailCurveP1: {x: 0, y: 0}});
     // bubble.create("up__ left"  , 300, 400, 240, 200, {tailCurveP1: {x: 0, y: 0}});
     // bubble.create("left_ down" , 550, 90 , 240, 200, {tailBaseAngle: -90, tailCurveP1: {x: -100, y: -50}, tailCurveP2: {x: -200, y: -50}});
-    bubble.create("left_ left_", 550, 175, 240, 200, {tailCurveP1: {x: -100, y: -150}, tailCurveP2: {x: -200, y: 150}});
-    // bubble.create("left_ up "  , 550, 280, 240, 200, {tailWidth: 10});
+    // bubble.create("left_ left_", 550, 175, 240, 200, {tailCurveP1: {x: -100, y: -150}, tailCurveP2: {x: -200, y: 150}});
+    // bubble.create("left_ up "  , 550, 280, 240, 200, {tailWidth: 20, tailBaseAngle: -110, tailCurveP1: {x: 0, y: 0}, tailCurveP2: {x: -150, y: 120}});
 }
