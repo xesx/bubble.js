@@ -64,6 +64,8 @@ function Bubble(areaId){
 
 		html.insertAdjacentElement("afterBegin", svg);
 
+		return html;
+
 	}
 
 	//
@@ -102,8 +104,8 @@ function Bubble(areaId){
 		_self.calcBubbleCoordinatesInSVG();
 
 		//Нужно ли увеличивать элемент SVG справа и/или снизу
-		svg.style.width    = _self.getErValue("b", [_self.options.SVGWidth, _self.options.tailCurveP1Abs.x, _self.options.tailCurveP2Abs.x]);
-		svg.style.height   = _self.getErValue("b", [_self.options.SVGHeight, _self.options.tailCurveP1Abs.y, _self.options.tailCurveP2Abs.y]);
+		svg.style.width  =  _self.options.SVGWidth = _self.getErValue("b", [_self.options.SVGWidth, _self.options.tailCurveP1Abs.x, _self.options.tailCurveP2Abs.x]);
+		svg.style.height = _self.options.SVGHeight = _self.getErValue("b", [_self.options.SVGHeight, _self.options.tailCurveP1Abs.y, _self.options.tailCurveP2Abs.y]);
 
 		//Нужно ли увеличивать элемент SVG слева и/или сверху
 		var addSVGWidth  = _self.getErValue("s", [_self.options.SVGWidth, _self.options.tailCurveP1Abs.x, _self.options.tailCurveP2Abs.x]);
