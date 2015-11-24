@@ -104,8 +104,8 @@ function Bubble(areaId){
 		_self.calcBubbleCoordinatesInSVG();
 
 		//Нужно ли увеличивать элемент SVG справа и/или снизу
-		svg.style.width  =  _self.options.SVGWidth = _self.getErValue("b", [_self.options.SVGWidth, _self.options.tailCurveP1Abs.x, _self.options.tailCurveP2Abs.x]);
-		svg.style.height = _self.options.SVGHeight = _self.getErValue("b", [_self.options.SVGHeight, _self.options.tailCurveP1Abs.y, _self.options.tailCurveP2Abs.y]);
+		svg.style.width  = _self.optionAdd("SVGWidth",  _self.getErValue("b", [_self.options.SVGWidth, _self.options.tailCurveP1Abs.x, _self.options.tailCurveP2Abs.x]))  + "px";
+		svg.style.height = _self.optionAdd("SVGHeight", _self.getErValue("b", [_self.options.SVGHeight, _self.options.tailCurveP1Abs.y, _self.options.tailCurveP2Abs.y])) + "px";
 
 		//Нужно ли увеличивать элемент SVG слева и/или сверху
 		var addSVGWidth  = _self.getErValue("s", [_self.options.SVGWidth, _self.options.tailCurveP1Abs.x, _self.options.tailCurveP2Abs.x]);
@@ -119,10 +119,10 @@ function Bubble(areaId){
 			_self.options.offsetX += addSVGWidth;
 			_self.options.offsetY += addSVGHeight;
 
-			svg.style.width = _self.options.SVGWidth += addSVGHeight;
+			svg.style.width = _self.optionAdd("SVGWidth", _self.options.SVGWidth + addSVGHeight) + "px";
 			svg.style.left  = _self.optionAdd("xSVG", -_self.options.offsetX) + "px";
 
-			svg.style.height = _self.options.SVGHeight += addSVGHeight;
+			svg.style.height = _self.optionAdd("SVGHeight", _self.options.SVGHeight + addSVGHeight) + "px";
 			svg.style.top    = _self.optionAdd("ySVG", -_self.options.offsetY) + "px";
 
 			//и координаты пузыря внутри элемента SVG
