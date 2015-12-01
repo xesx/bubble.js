@@ -1,3 +1,5 @@
+'use strict'
+
 function Bubble(areaId){
 	var _self = this;
 	
@@ -15,6 +17,8 @@ function Bubble(areaId){
 	,	borderColor          : "#000000"       // цвет границ (color)
 	,	borderRadius         : 9000            // радиус скругления углов границ
 	,	fill                 : "#FFFFFF"       // цвет заливки (color)
+
+	,	shadow               : true            // добавлять ли тень (boolean)
 	,	shadowColor          : "#000000"       // цвет тени (color)
 	,	shadowH              : 0               // смещение тени по горизонтали (number)
 	,	shadowV              : 0               // смещение тени по вертикали (number)
@@ -47,7 +51,7 @@ function Bubble(areaId){
 			var optionsCustom = {};
 		}
 
-		for(option in _self.optionsDefault){
+		for(var option in _self.optionsDefault){
 			_self.options[option] = (optionsCustom[option] === undefined) ? _self.optionsDefault[option] : optionsCustom[option];
 		}
 
@@ -155,24 +159,26 @@ function Bubble(areaId){
 		defs.insertAdjacentElement("beforeEnd", filter);
 
 		// Тень
-		// debugger
-		var pathBodyShadow = document.createElementNS("http://www.w3.org/2000/svg", 'path');
-		
-		var dPathBodyShadow = pathBodyMain.getAttribute("d");
-		//Проходимся по все углам элемента чтобы при отрисовке path рисунок не обрезался
-		//Особенно заметно отсутствие этой строки при большом значении shadowBlurRadius
-		dPathBodyShadow += " M0,0 M" + _self.options.SVGWidth + ",0 M" + _self.options.SVGWidth + "," + _self.options.SVGHeight + " M0," + _self.options.SVGHeight + " ";
+		if (_self.options.shadow){
+			var pathBodyShadow = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+			
+			var dPathBodyShadow = pathBodyMain.getAttribute("d");
+			//Проходимся по все углам элемента чтобы при отрисовке path рисунок не обрезался
+			//Особенно заметно отсутствие этой строки при большом значении shadowBlurRadius
+			dPathBodyShadow += " M0,0 M" + _self.options.SVGWidth + ",0 M" + _self.options.SVGWidth + "," + _self.options.SVGHeight + " M0," + _self.options.SVGHeight + " ";
+	
+			pathBodyShadow.setAttribute("d", dPathBodyShadow);
+			pathBodyShadow.setAttribute("filter", "url(#shadow)");
+			pathBodyShadow.setAttribute("transform", "translate(" + _self.options.shadowH + "," + _self.options.shadowV + ")");
+	
+			// shadowV
+			pathBodyShadow.style.fill = _self.options.shadowColor;
+	
+			// вставляем в элемент svg
+			svg.insertAdjacentElement("afterBegin", defs);
+			svg.insertAdjacentElement("beforeEnd", pathBodyShadow);
+		}
 
-		pathBodyShadow.setAttribute("d", dPathBodyShadow);
-		pathBodyShadow.setAttribute("filter", "url(#shadow)");
-		pathBodyShadow.setAttribute("transform", "translate(" + _self.options.shadowH + "," + _self.options.shadowV + ")");
-
-		// shadowV
-		pathBodyShadow.style.fill = _self.options.shadowColor;
-
-		// вставляем в элемент svg
-		svg.insertAdjacentElement("afterBegin", defs);
-		svg.insertAdjacentElement("beforeEnd", pathBodyShadow);
 		svg.insertAdjacentElement("beforeEnd", pathBodyMain);
 
 		return svg;
@@ -313,8 +319,12 @@ function Bubble(areaId){
 		var p2 = {}; // вторая контрольная точка кривой Безье
 
 		if(_self.options.tailCurveP1.x == undefined || _self.options.tailCurveP1.y == undefined){ // если координаты опорных точек не определены
-			p1.x = _self.options.xTailSVG;
-			p1.y = _self.options.yTailSVG;
+			// p1.x = _self.options.xTailSVG;
+			// p1.y = _self.options.yTailSVG;
+
+			p1.x = _self.options.centerTailBase.x;
+			p1.y = _self.options.centerTailBase.y;
+
 			p1.defined = false;
 		} else{
 			// p1.x = _self.options.centerTailBase.x + Math.abs(_self.options.xTailSVG - _self.options.centerTailBase.x) * _self.options.tailCurveP1.x;
@@ -325,14 +335,18 @@ function Bubble(areaId){
 		}
 
 		if(_self.options.tailCurveP2.x == undefined || _self.options.tailCurveP2.y == undefined){ // если координаты опорных точек не определены
-			p2 = p1;
+			// p2 = p1;
+			p2.x = _self.options.xTailSVG;
+			p2.y = _self.options.yTailSVG;
+			p2.defined = false;
+
 		} else{
 			// p2.x = _self.options.centerTailBase.x + Math.abs(_self.options.xTailSVG - _self.options.centerTailBase.x) * _self.options.tailCurveP2.x;
 			// p2.y = _self.options.centerTailBase.y + Math.abs(_self.options.yTailSVG - _self.options.centerTailBase.y) * _self.options.tailCurveP2.y;
 			p2.x = _self.options.centerTailBase.x + _self.options.tailCurveP2.x;
 			p2.y = _self.options.centerTailBase.y + _self.options.tailCurveP2.y;
 
-			if (!p1.defined) p1 = p2; // на случай ели p2 определена, а p1 нет
+			// if (!p1.defined) p1 = p2; // на случай ели p2 определена, а p1 нет
 		}
 
 		_self.options.tailCurveP1Abs = p1;
