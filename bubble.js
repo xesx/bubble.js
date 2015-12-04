@@ -11,8 +11,8 @@ function Bubble(areaId){
 	,	textPadding          : 20              // отступ от края пузыря до текста в пикселях (number)
 	,	textAlign            : "center"        // выравнивание текста (string)
 	,	fontFamily           : "Comic Sans MS" // семейство шрифтов для текста (string)
-	,	fontSize             : 16              // размер шрифта в пикселях (number)
-	,	fontColor            : "#000000"       // цвет шрифта (color)
+	,	fontSize             : "16px"          // размер шрифта (string)
+	,	fontColor            : undefined       // цвет шрифта (color)
 	,	borderWidth          : 0.5             // ширина границ (number)
 	,	borderColor          : "#000000"       // цвет границ (color)
 	,	borderRadius         : 9000            // радиус скругления углов границ
@@ -20,15 +20,16 @@ function Bubble(areaId){
 
 	,	shadow               : true            // добавлять ли тень (boolean)
 	,	shadowColor          : "#000000"       // цвет тени (color)
-	,	shadowH              : 0               // смещение тени по горизонтали (number)
-	,	shadowV              : 0               // смещение тени по вертикали (number)
-	,	shadowBlurRadius     : 0               // радиус размытия тени (number)
+	,	shadowH              : 1               // смещение тени по горизонтали (number)
+	,	shadowV              : -1               // смещение тени по вертикали (number)
+	,	shadowBlurRadius     : 2               // радиус размытия тени (number)
 	
 	,	tailWidth            : 20              // ширина основания хвоста в пикселях (number)
 	,	tailBaseAngle        : undefined       // параметр задает угол исходя из которого будет рассчитана точка основания хвоста на периметре тела (number)
 	,	tailCurveP1          : {x: undefined, y: undefined}    // координаты первой опорной точки кривой Безье для отрисовки хвоста (object{x: (number), y: (number)})
 	,	tailCurveP2          : {x: undefined, y: undefined}    // координаты второй опорной точки кривой Безье для отрисовки хвоста (object{x: (number), y: (number)})
-	                                           // координаты задаются в системе, где центр основания хвоста это точка [0, 0]
+	                                                           // координаты задаются в системе, где центр основания хвоста это точка [0, 0]
+	,	className            : "bubble"        // имя класса контейнера пузыря (string)
 
 	}
 
@@ -76,6 +77,11 @@ function Bubble(areaId){
 	//Создаем SVG
 	//
 	this.createSVG = function(html){
+		/**
+		* test
+		*
+		*		
+		*/
 		var xBody = _self.options.xBody;
 		var yBody = _self.options.yBody;
 		var xTail = _self.options.xTail;
@@ -516,6 +522,8 @@ function Bubble(areaId){
 		bubbleContainer.style.width    = _self.options.textMaxWidth + "px";
 		bubbleContainer.style.left     = xBody + "px";
 		bubbleContainer.style.top      = yBody + "px";
+		
+		if(_self.options.className) bubbleContainer.className      = _self.options.className;
 
 		//создаем элемент для текста
 		var textContainer = document.createElement("span");
@@ -533,6 +541,7 @@ function Bubble(areaId){
 		// вставляем текст
 		textContainer.innerHTML = text;
 
+
 		//вставляем текстовый контейнер в общий
 		bubbleContainer.insertAdjacentElement("beforeEnd",textContainer);
 
@@ -544,7 +553,7 @@ function Bubble(areaId){
 		var textHeight = _self.optionAdd("textHeight", parseInt(textContainer.offsetHeight));
 
 		// Фиксируем ширину и высоту текстового контейнера
-		textContainer.style.width    = textWidth + 1 + "px"; // добавляем один пиксель на случай если ширина больше на десятые или сотые доли единицы
+		textContainer.style.width    = textWidth + 2 + "px"; // добавляем пару пикселей на случай если ширина больше на десятые или сотые доли единицы
 		textContainer.style.height   = textHeight + "px";
 		textContainer.style.position = "absolute";
 
