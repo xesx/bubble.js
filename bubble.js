@@ -151,6 +151,8 @@ function Bubble(areaId){
 		pathBodyMain.style.stroke      = _self.options.borderColor;
 		pathBodyMain.style.strokeWidth = _self.options.borderWidth;
 
+		pathBodyMain.setAttribute("class", "bubbleBodyMain");
+
 
 		// фильтр для тени
 		var defs = document.createElementNS("http://www.w3.org/2000/svg", 'defs');
@@ -176,6 +178,8 @@ function Bubble(areaId){
 			pathBodyShadow.setAttribute("d", dPathBodyShadow);
 			pathBodyShadow.setAttribute("filter", "url(#shadow)");
 			pathBodyShadow.setAttribute("transform", "translate(" + _self.options.shadowH + "," + _self.options.shadowV + ")");
+			
+			pathBodyShadow.setAttribute("class", "bubbleBodyShadow");
 	
 			// shadowV
 			pathBodyShadow.style.fill = _self.options.shadowColor;
