@@ -13,6 +13,7 @@ function Bubble(areaId){
 	,	fontFamily           : "Comic Sans MS" // семейство шрифтов для текста (string)
 	,	fontSize             : "16px"          // размер шрифта (string)
 	,	fontColor            : undefined       // цвет шрифта (color)
+	, lineHeight           : 1.5             // межстрочный интервал
 	,	borderWidth          : 0.5             // ширина границ (number)
 	,	borderColor          : "#000000"       // цвет границ (color)
 	,	borderRadius         : 9000            // радиус скругления углов границ
@@ -369,7 +370,7 @@ function Bubble(areaId){
 	//
 	this.getPathForBodyWithTail = function(){
 		var path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
-		var segList = path.pathSegList;
+		var d = '';
 
 		var bodyPath = _self.options.bodyPath;
 		var lengths  = _self.options.segBodyLenghts;
@@ -379,8 +380,8 @@ function Bubble(areaId){
 		var tailBaseP1SegNumber = bodyPath.getPathSegAtLength(_self.options.tailBaseP1Distance);
 		var tailBaseP2SegNumber = bodyPath.getPathSegAtLength(_self.options.tailBaseP2Distance);
 
-		segList.appendItem(path.createSVGPathSegMovetoAbs(_self.options.tailBaseP2.x, _self.options.tailBaseP2.y));
-
+		d = 'M' + _self.options.tailBaseP2.x + ',' + _self.options.tailBaseP2.y
+		
 		//Тело
 		var segment = tailBaseP2SegNumber
 		var targetPoint = {};
@@ -394,9 +395,9 @@ function Bubble(areaId){
 			}
 			
 			if(segment % 2 == 0){ // дуга
-				segList.appendItem(path.createSVGPathSegArcAbs(targetPoint.x, targetPoint.y, radius, radius, 90, 0, 1));
+				d += 'A' + ' ' + radius + ' ' + radius + ' ' + 90 + ' ' + 0 + ' ' + 1 + targetPoint.x + ' ' + targetPoint.y;
 			} else{ // прямая
-				segList.appendItem(path.createSVGPathSegLinetoAbs(targetPoint.x, targetPoint.y));
+				d += 'L' + targetPoint.x + ' ' + targetPoint.y;
 			}
 
 			// 1 <= segment <= 9
@@ -411,22 +412,10 @@ function Bubble(areaId){
 		// _self.setPoint(_self.options.SVGElement, p1.x, p1.y, "white");
 		// _self.setPoint(_self.options.SVGElement, p2.x, p2.y, "black");
 
-		segList.appendItem(path.createSVGPathSegCurvetoCubicAbs(_self.options.xTailSVG  // x
-															  , _self.options.yTailSVG  // y
-															  , p1.x // x1
-															  , p1.y // y1
-															  , p2.x  // x2
-															  , p2.y  // y2
-															  ));
+		d += 'C' + p1.x + ' ' + p1.y + ' ' + p2.x + ' ' + p2.y + ' ' + _self.options.xTailSVG + ' ' + _self.options.yTailSVG;
+		d += 'C' + p2.x + ' ' + p2.y + ' ' + p1.x + ' ' + p1.y + ' ' + _self.options.tailBaseP2.x + ' ' + _self.options.tailBaseP2.y;
 
-
-		segList.appendItem(path.createSVGPathSegCurvetoCubicAbs(_self.options.tailBaseP2.x  // x
-															  , _self.options.tailBaseP2.y  // y
-															  , p2.x  // x1
-															  , p2.y  // y1
-															  , p1.x  // x2
-															  , p1.y  // y2
-															  ));
+		path.setAttribute('d', d);
 
 		return path;
 	}
@@ -451,38 +440,48 @@ function Bubble(areaId){
 		var horisontalStreight = _self.optionAdd("horisontalStreight", (bodyWidth - radius * 2));
 		var verticalStreight   = _self.optionAdd("verticalStreight", (bodyHeight - radius * 2));
 
-		var segList = path.pathSegList;
+		var d = '';
 
 		var segBodyLenghts = [];
 
-		segList.appendItem(path.createSVGPathSegMovetoAbs((xStart + bodyWidth/2), yStart));
+		d += 'M' + (xStart + bodyWidth/2) + ',' + yStart;
+		path.setAttribute('d', d);
 		segBodyLenghts.push(path.getTotalLength());
 
-		segList.appendItem(path.createSVGPathSegLinetoHorizontalRel(horisontalStreight/2));
-		segBodyLenghts.push(path.getTotalLength());
-		
-		segList.appendItem(path.createSVGPathSegArcRel(radius, radius, radius, radius, 90, 0, 1));
+		d += 'h' + horisontalStreight/2;
+		path.setAttribute('d', d);
 		segBodyLenghts.push(path.getTotalLength());
 
-		segList.appendItem(path.createSVGPathSegLinetoVerticalRel(verticalStreight));
+		d += 'a' + radius + ' ' + radius + ' ' + 90 + ' ' + 0 + ' ' + 1 + ' ' + radius + ' ' + radius;
+		path.setAttribute('d', d);
 		segBodyLenghts.push(path.getTotalLength());
 
-		segList.appendItem(path.createSVGPathSegArcRel(-radius, radius, radius, radius, 90, 0, 1));
+		d += 'v' + verticalStreight;
+		path.setAttribute('d', d);
 		segBodyLenghts.push(path.getTotalLength());
 
-		segList.appendItem(path.createSVGPathSegLinetoHorizontalRel(-horisontalStreight));
+		d += 'a' + ' ' +  radius + ' ' +  radius + ' ' +  90 + ' ' +  0 + ' ' +  1 + (-radius) + ' ' +  radius;
+		path.setAttribute('d', d);
 		segBodyLenghts.push(path.getTotalLength());
 
-		segList.appendItem(path.createSVGPathSegArcRel(-radius, -radius, radius, radius, 90, 0, 1));
+		d += 'h ' + (-horisontalStreight);
+		path.setAttribute('d', d);
 		segBodyLenghts.push(path.getTotalLength());
 
-		segList.appendItem(path.createSVGPathSegLinetoVerticalRel(-verticalStreight));
+		d += 'a' + ' ' + radius + ' ' + radius + ' ' + 90 + ' ' + 0 + ' ' + 1 + (-radius) + ' ' + (-radius);
+		path.setAttribute('d', d);
 		segBodyLenghts.push(path.getTotalLength());
 
-		segList.appendItem(path.createSVGPathSegArcRel(radius, -radius, radius, radius, 90, 0, 1));
+		d += 'v' + (-verticalStreight)
+		path.setAttribute('d', d);
 		segBodyLenghts.push(path.getTotalLength());
 
-		segList.appendItem(path.createSVGPathSegLinetoHorizontalRel(horisontalStreight/2));
+		d += 'a' + ' ' + radius + ' ' + radius + ' ' + 90 + ' ' + 0 + ' ' + 1 + radius + ' ' + (-radius);
+		path.setAttribute('d', d);
+		segBodyLenghts.push(path.getTotalLength());
+
+		d += 'h' + (horisontalStreight/2)
+		path.setAttribute('d', d);
 		segBodyLenghts.push(path.getTotalLength());
 
 		_self.optionAdd("segBodyLenghts", segBodyLenghts);
@@ -534,12 +533,15 @@ function Bubble(areaId){
 		textContainer.style.position   = "relative";
 		textContainer.style.left       = _self.options.textPadding + "px";
 		textContainer.style.top        = _self.options.textPadding + "px";
+
+		textContainer.classList.add("bubbleText");
 		
 		//стилизуем
 		textContainer.style.fontFamily = _self.options.fontFamily;
 		textContainer.style.fontSize   = _self.options.fontSize;
 		textContainer.style.color      = _self.options.fontColor;
 		textContainer.style.textAlign  = _self.options.textAlign;
+		textContainer.style.lineHeight  = _self.options.lineHeight;
 		textContainer.style.display    = "inline-block";
 
 		// вставляем текст
