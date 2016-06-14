@@ -8,6 +8,7 @@ function content(){
     var cont = document.getElementById("cont");
     var cont1 = document.getElementById("cont1");
 
+    // Делаем сетку
     cont1.innerHTML = '';
 
     var cell = 10;
@@ -38,22 +39,11 @@ function content(){
         cont.insertAdjacentElement("beforeEnd", div);
     };
 
-
+    // Создаем пузыри
+    // Определяем контейнер
     var bubble = new Bubble(cont1);
-
     
-    // bubble.create("I'm Lisa"
-    //                       , 120, 120, 450, 450
-    //                       , {tailBaseAngle: 180
-    //                        , tailWidth: 20
-    //                        , tailCurveP1: {x: 0, y: 0.3}
-    //                        , tailCurveP2: {x: 0.7, y: 0.3}
-    //                         });
-
-
-    // var div = bubble.create("test test test test", 0, 0);
-
-    
+    //Задаем кастомные свойства по умолчанию для все пузырей в данном контейнере
     bubble.optionsDefault.textMaxWidth     = 200             // максимальная ширина текстового блока в пикселях (number)
     bubble.optionsDefault.textPadding      = 20              // отступ от края пузыря до текста в пикселях (number)
     bubble.optionsDefault.textAlign        = "center"        // выравнивание текста (string)
@@ -74,7 +64,14 @@ function content(){
     bubble.optionsDefault.tailCurveP2      = {x: undefined, y: undefined}    // координаты второй опорной точки кривой Безье для отрисовки хвоста (object{x: (number), y: (number)})
 	                                                                         // координаты задаются как коэффициенты длины от начала кривой до ее конца по каждой из координат
 
-
+    // Создаем пузыри
+    // Объект контейнера пузыря.create("текст внутри пузыря"
+    //                               , коодината пузыря по оси x в контейнере
+    //                               , коодината пузыря по оси y в контейнере
+    //                               , коодината хвоста пузыря по оси y в контейнере
+    //                               , коодината хвоста пузыря по оси y в контейнере
+    //                               , {свойства для данного пузыря}
+    //                                )
     bubble.create("down right" , 100,  10, 240, 200, {tailCurveP1: {x: 0, y: 0}});
     bubble.create("down down"  , 195,  10, 240, 200, {tailWidth: 20, tailCurveP1: {x: 0, y: 0}, tailCurveP2: {x: -10, y: 120}});
     bubble.create("down left"  , 300,  10, 240, 200, {});    
