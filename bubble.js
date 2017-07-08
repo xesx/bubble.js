@@ -1,62 +1,66 @@
 ;(function(){
 'use strict'
-window.Bubble = function (areaId){ 
+window.Bubble = function(areaId){
 	this.areaId     = this.getNotStaticElement(areaId); // Контейнер. Это должен быть элемент с position != static, поскольку относительно него будут задаваться координаты
 
 	//Свойства по умолчанию
 	this.optionsDefault = {
-		textMaxWidth         : 200             // максимальная ширина текстового блока в пикселях (number)
-	,	textPadding          : 20              // отступ от края пузыря до текста в пикселях (number)
-	,	textAlign            : 'center'        // выравнивание текста (string)
-	,	fontFamily           : 'Comic Sans MS' // семейство шрифтов для текста (string)
-	,	fontSize             : '16px'          // размер шрифта (string)
-	,	fontColor            : undefined       // цвет шрифта (color)
-	, lineHeight           : 1.5             // межстрочный интервал
-	
-	, bubbleWidth          : 0               // ширина тела пузыря (number) по умолчанию не задана и опрежеляется автоматически в зависимости от содержимого
-	, bubbleHeight         : 0               // высота тела пузыря (number) ---
-	,	borderWidth          : 0.5             // ширина границ (number)
-	,	borderColor          : '#000000'       // цвет границ (color)
-	,	borderRadius         : 9000            // радиус скругления углов границ
-	,	fill                 : '#FFFFFF'       // цвет заливки (color)
+		textMaxWidth         : 200,             // максимальная ширина текстового блока в пикселях (number)
+		textPadding          : 20,              // отступ от края пузыря до текста в пикселях (number)
+		textAlign            : 'center',        // выравнивание текста (string)
+		fontFamily           : 'Comic Sans MS', // семейство шрифтов для текста (string)
+		fontSize             : '16px',          // размер шрифта (string)
+		fontColor            : undefined,       // цвет шрифта (color)
+		lineHeight           : 1.5,             // межстрочный интервал
 
-	,	shadow               : true            // добавлять ли тень (boolean)
-	,	shadowColor          : '#000000'       // цвет тени (color)
-	,	shadowH              : 1               // смещение тени по горизонтали (number)
-	,	shadowV              : -1               // смещение тени по вертикали (number)
-	,	shadowBlurRadius     : 2               // радиус размытия тени (number)
-	
-	,	tailWidth            : 20              // ширина основания хвоста в пикселях (number)
-	,	tailBaseAngle        : undefined       // параметр задает угол исходя из которого будет рассчитана точка основания хвоста на периметре тела (number)
-	,	tailCurveP1          : {x: undefined, y: undefined}    // координаты первой опорной точки кривой Безье для отрисовки хвоста (object{x: (number), y: (number)})
-	,	tailCurveP2          : {x: undefined, y: undefined}    // координаты второй опорной точки кривой Безье для отрисовки хвоста (object{x: (number), y: (number)})
-	                                                           // координаты задаются в системе, где центр основания хвоста это точка [0, 0]
-	,	className            : 'bubble'        // имя класса контейнера пузыря (string)
+		bubbleWidth          : 0,               // ширина тела пузыря (number) по умолчанию не задана и опрежеляется автоматически в зависимости от содержимого
+		bubbleHeight         : 0,               // высота тела пузыря (number) ---
+		borderWidth          : 0.5,             // ширина границ (number)
+		borderColor          : '#000000',       // цвет границ (color)
+		borderRadius         : 9000,            // радиус скругления углов границ
+		fill                 : '#FFFFFF',       // цвет заливки (color)
 
-	}
+		shadow               : true,            // добавлять ли тень (boolean)
+		shadowColor          : '#000000',       // цвет тени (color)
+		shadowH              : 1,               // смещение тени по горизонтали (number)
+		shadowV              : -1,              // смещение тени по вертикали (number)
+		shadowBlurRadius     : 2,               // радиус размытия тени (number)
+	
+		tailWidth            : 20,              // ширина основания хвоста в пикселях (number)
+		tailBaseAngle        : undefined,       // параметр задает угол исходя из которого будет рассчитана точка основания хвоста на периметре тела (number)
+		tailCurveP1          : {x: undefined, y: undefined},    // координаты первой опорной точки кривой Безье для отрисовки хвоста (object{x: (number), y: (number)})
+		tailCurveP2          : {x: undefined, y: undefined},    // координаты второй опорной точки кривой Безье для отрисовки хвоста (object{x: (number), y: (number)})
+	                                                            // координаты задаются в системе, где центр основания хвоста это точка [0, 0]
+		className            : 'bubble'         // имя класса контейнера пузыря (string)
+	};
 
 	//Объект для свойств создаваемого пузыря, получаемый слиянием свойств по умолчанию + свойства заданные при вызове функции create в параметре optionsCustom
 	this.options = {};
-}
+};
 
 Bubble.prototype.count = 0;
 
+    /**
+	 * Создание пузыря
+     * @param text  {String} - текст
+     * @param xBody {Number} - координаты для верхнего левого края текстового блока в пикселах, относительно areaId
+     * @param yBody {Number} - --"--
+     * @param xTail {Number} - координаты конца хвоста в пикселах, относительно areaId
+     * @param yTail {Number} - --"--
+     * @param optionsCustom {Onject} - объект со свойствами пузыря, если не задано свойство или вообще объект, то берется из this.optionsDefault
+     */
 Bubble.prototype.create = function(text, xBody, yBody, xTail, yTail, optionsCustom){
-	/*
-	text           - текст (string)
-	xBody, yBody   - координаты для верхнего левого края текстового блока в пикселах, относительно areaId (number)
-	xTail, yTail   - координаты конца хвоста в пикселах, относительно areaId (number)
-	optionsCustom  - объект со свойствами пузыря, если не задано свойство или вообще объект, то берется из this.optionsDefault (object)
-	*/
-
-	//Обнуляем при создании нового пузыря
+	// Обнуляем при создании нового пузыря
 	this.options = {};
+
 	if (!optionsCustom){
-		var optionsCustom = {};
+		optionsCustom = {};
 	}
+
 	for(var option in this.optionsDefault){
 		this.options[option] = (optionsCustom[option] === undefined) ? this.optionsDefault[option] : optionsCustom[option];
 	}
+
 	//Записываем аргументы в options
 	this.optionAdd('id', ++Bubble.prototype.count);
 	this.optionAdd('text', text);
@@ -70,11 +74,11 @@ Bubble.prototype.create = function(text, xBody, yBody, xTail, yTail, optionsCust
 	return html;
 }
 
+ /**
+  * Создаем SVG
+  */
 Bubble.prototype.createSVG = function(html){
-	/**
-	* Создаем SVG
-	*		
-	*/
+
 	var xBody = this.options.xBody;
 	var yBody = this.options.yBody;
 	var xTail = this.options.xTail;
@@ -165,10 +169,10 @@ Bubble.prototype.createSVG = function(html){
 	return svg;
 }
 
-Bubble.prototype.calcBubbleCoordinatesInSVG = function(){
 /**
-* Рассчитываем координаты всех элементов пузыря
-*/
+ * Рассчитываем координаты всех элементов пузыря
+ */
+Bubble.prototype.calcBubbleCoordinatesInSVG = function(){
 	//Координаты верхнего левого угла тела пузыря в svg-элементе
 	var xBodySVG = this.optionAdd('xBodySVG', this.options.offsetX);
 	var yBodySVG = this.optionAdd('yBodySVG', this.options.offsetY);
@@ -186,20 +190,20 @@ Bubble.prototype.calcBubbleCoordinatesInSVG = function(){
 	this.calcTailCurvePoints();
 }
 
-Bubble.prototype.coordinatesToSVG = function(x, y){
 /**
-* Конвертирование точки из системы координат Container в SVG
-*/
+ * Конвертирование точки из системы координат Container в SVG
+ */
+Bubble.prototype.coordinatesToSVG = function(x, y){
 	var p = {};
 	p.x = x - this.options.xBody - this.options.xSVG;
 	p.y = y - this.options.yBody - this.options.ySVG;
 	return p;
 }
 
-Bubble.prototype.calcTailBasePoints = function(){
 /**
-* Определение точек основания хвоста
-*/
+ * Определение точек основания хвоста
+ */
+Bubble.prototype.calcTailBasePoints = function(){
 	// временный элемент path который описывает тело пузыря
 	var pathBody = this.options.pathBody;
 	//длина периметра тела пузыря
@@ -231,10 +235,10 @@ Bubble.prototype.calcTailBasePoints = function(){
 	var tailBaseP2 = this.optionAdd('tailBaseP2', pathBody.getPointAtLength(tailBaseP2Distance));
 }
 
-Bubble.prototype.getTailAngle = function(){
 /**
-* Метод получения угла между центральной осью ординат и прямой проведенной из центра тела пузыря к точке окончания хвоста
-*/
+ * Метод получения угла между центральной осью ординат и прямой проведенной из центра тела пузыря к точке окончания хвоста
+ */
+Bubble.prototype.getTailAngle = function(){
 	//координаты центра тела пузыря
 	var x1 = this.options.xBodySVG + this.options.bodyWidth/2;
 	var y1 = this.options.yBodySVG + this.options.bodyHeight/2;
@@ -254,15 +258,17 @@ Bubble.prototype.getTailAngle = function(){
 	}
 }
 
-Bubble.prototype.getSVGSize = function(cBody, cTail, bodyLong){
+
 /**
-* Получение размеров svg-элемента
-* cBody    - координата верхнего левого угла тела (x или y)
-* cTail    - координата конца хвоста (x или y)
-* bodyLong - длина тела (высота или ширина)
-* если надо получить ширину передаем координаты хвоста и тела по оси x и ширину
-* если надо получить высоту передаем координаты хвоста и тела по оси y и высоту
-*/
+ * Получение размеров svg-элемента
+ * если надо получить ширину передаем координаты хвоста и тела по оси x и ширину
+ * если надо получить высоту передаем координаты хвоста и тела по оси y и высоту
+ * @param cBody {Number} - координата верхнего левого угла тела (x или y)
+ * @param cTail {Number} - координата конца хвоста (x или y)
+ * @param bodyLong {Number} - длина тела (высота или ширина)
+ * @returns {*}
+ */
+Bubble.prototype.getSVGSize = function(cBody, cTail, bodyLong){
 	if(cTail < cBody){
 		return cBody + bodyLong - cTail;
 	} else if(cTail <= (cBody + bodyLong)){
@@ -272,10 +278,10 @@ Bubble.prototype.getSVGSize = function(cBody, cTail, bodyLong){
 	}
 }
 
-Bubble.prototype.calcTailCurvePoints = function(){
 /**
-* Расчитаем опорные точки кривой Безье для построения хвоста в SVG-элементе
-*/
+ * Расчитаем опорные точки кривой Безье для построения хвоста в SVG-элементе
+ */
+Bubble.prototype.calcTailCurvePoints = function(){
 	var p1 = {}; // первая контрольная точка кривой Безье
 	var p2 = {}; // вторая контрольная точка кривой Безье
 	if(this.options.tailCurveP1.x == undefined || this.options.tailCurveP1.y == undefined){ // если координаты опорных точек не определены
@@ -307,20 +313,21 @@ Bubble.prototype.calcTailCurvePoints = function(){
 	this.options.tailCurveP2Abs = p2;
 }
 
-Bubble.prototype.getPathForBodyWithTail = function(){
 /**
-* Формирование path пузыря с хвостом
-*/
+ * Формирование path пузыря с хвостом
+ */
+Bubble.prototype.getPathForBodyWithTail = function(){
 	var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 	var d = '';
 	var bodyPath = this.options.bodyPath;
 	var lengths  = this.options.segBodyLenghts;
 	var radius   = this.options.realRadius;
+
 	//номера сегментов
 	var tailBaseP1SegNumber = bodyPath.getPathSegAtLength(this.options.tailBaseP1Distance);
 	var tailBaseP2SegNumber = bodyPath.getPathSegAtLength(this.options.tailBaseP2Distance);
 	d = 'M' + this.options.tailBaseP2.x + ',' + this.options.tailBaseP2.y
-	
+
 	//Тело
 	var segment = tailBaseP2SegNumber
 	var targetPoint = {};
@@ -332,7 +339,7 @@ Bubble.prototype.getPathForBodyWithTail = function(){
 			targetPoint = bodyPath.getPointAtLength(this.options.tailBaseP1Distance);
 			i = 9;	// заканчиваем цикл после текущей итерации
 		}
-		
+
 		if(segment % 2 == 0){ // дуга
 			d += 'A' + ' ' + radius + ' ' + radius + ' ' + 90 + ' ' + 0 + ' ' + 1 + targetPoint.x + ' ' + targetPoint.y;
 		} else{ // прямая
@@ -342,6 +349,7 @@ Bubble.prototype.getPathForBodyWithTail = function(){
 		segment = (++segment) % 10;
 		segment = (segment != 0) ? segment : 1;
 	};
+
 	//Хвост
 	var p1 = this.options.tailCurveP1Abs; // первая контрольная точка кривой Безье
 	var p2 = this.options.tailCurveP2Abs; // вторая контрольная точка кривой Безье
@@ -353,17 +361,18 @@ Bubble.prototype.getPathForBodyWithTail = function(){
 	return path;
 }
 
-Bubble.prototype.getPathForBody = function(xStart, yStart){
 /**
-* Формирование path тела пузыря
-* xStart, yStart - координаты левого верхнего угла (без учета borderRadius) в рамках svg-элемента
-*/
+ * Формирование path тела пузыря
+ * xStart, yStart - координаты левого верхнего угла (без учета borderRadius) в рамках svg-элемента
+ */
+Bubble.prototype.getPathForBody = function(xStart, yStart){
 	var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 	var bodyWidth  = this.options.bodyWidth;
-		var bodyHeight = this.options.bodyHeight;
-		var radius     = this.options.realRadius;
-		var svgWidth   = this.options.SVGWidth
-		var svgHeight  = this.options.SVGHeight
+	var bodyHeight = this.options.bodyHeight;
+	var radius     = this.options.realRadius;
+	var svgWidth   = this.options.SVGWidth;
+	var svgHeight  = this.options.SVGHeight;
+
 	//длина прямых частей границ
 	var horisontalStreight = this.optionAdd('horisontalStreight', (bodyWidth - radius * 2));
 	var verticalStreight   = this.optionAdd('verticalStreight', (bodyHeight - radius * 2));
@@ -403,10 +412,10 @@ Bubble.prototype.getPathForBody = function(xStart, yStart){
 	return this.optionAdd('bodyPath', path);
 }
 
-Bubble.prototype.getBorderRadius = function(){
 /**
-* Радиус скругления углов границ
-*/
+ * Радиус скругления углов границ
+ */
+Bubble.prototype.getBorderRadius = function(){
 	var width  = this.options.bodyWidth;
 	var height = this.options.bodyHeight;
 	var radius = this.options.borderRadius;
@@ -417,14 +426,14 @@ Bubble.prototype.getBorderRadius = function(){
 	return realBorderRadius;
 }
 
-Bubble.prototype.createHTML = function(text, xBody, yBody){
 /**
-* Создаем html
-* text           - текст (string)
-* xBody
-* yBody        - координаты для верхнего левого края текстового блока в пикселах, относительно areaId (number)
-*/
-
+ *
+ * @param text {String} - текст
+ * @param xBody {String} - координаты для верхнего левого края текстового блока в пикселах, относительно areaId
+ * @param yBody {String} - --"--
+ * @returns {Element}
+ */
+Bubble.prototype.createHTML = function(text, xBody, yBody){
 	//создаем общий контейнер для всего пузыря
 	var bubbleContainer = document.createElement('div');
 	bubbleContainer.style.position = 'absolute';
@@ -467,20 +476,20 @@ Bubble.prototype.createHTML = function(text, xBody, yBody){
 	return bubbleContainer;
 }
 
-Bubble.prototype.getErValue = function(type, array){
 /**
-* Получить большее или меньшее значение
-* type   - какое значение вернуть - меньшее ('s[maller]') или большее ('b[igger]') (string)
-* array  - массив значений для сравнения (array)
-*/
+ * Получить большее или меньшее значение
+ * type   - какое значение вернуть - меньшее ('s[maller]') или большее ('b[igger]') (string)
+ * array  - массив значений для сравнения (array)
+ */
+Bubble.prototype.getErValue = function(type, array){
 	type = type.substr(0, 1).toLowerCase();
 
 	if (!Array.isArray(array)) return false;
 
 	array.sort(function(a, b){
-							  if (a > b) return 1;
-							  if (a < b) return -1;
-							  });
+		if (a > b) return 1;
+		if (a < b) return -1;
+	});
 
 	if(type == 's'){
 		return array[0];
@@ -491,18 +500,18 @@ Bubble.prototype.getErValue = function(type, array){
 	}
 }
 
-Bubble.prototype.optionAdd = function(name, value){
 /**
-* Добавляем свойство в объект options
-*/
+ * Добавляем свойство в объект options
+ */
+Bubble.prototype.optionAdd = function(name, value){
 	this.options[name] = value;
 	return value;
 }
 
-Bubble.prototype.setPoint = function(svg, x, y, color){
 /**
-* Отладочный метод для добавления точки в svg-элемент
-*/
+ * Отладочный метод для добавления точки в svg-элемент
+ */
+Bubble.prototype.setPoint = function(svg, x, y, color){
 	var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
 	circle.setAttribute('cx', x);
 	circle.setAttribute('cy', y);
@@ -512,11 +521,11 @@ Bubble.prototype.setPoint = function(svg, x, y, color){
 	svg.insertAdjacentElement('beforeEnd', circle);
 }
 
-Bubble.prototype.getNotStaticElement = function(elem){
 /**
-* Проверка свойства position элемента
-* Если position у переданного элемента равно 'static', то возвращается первый родительский элемент с position != 'static'
-*/
+ * Проверка свойства position элемента
+ * Если position у переданного элемента равно 'static', то возвращается первый родительский элемент с position != 'static'
+ */
+Bubble.prototype.getNotStaticElement = function(elem){
 	var position = getComputedStyle(elem).position;
 
 	while(position == 'static' && elem.tagName != 'BODY'){
